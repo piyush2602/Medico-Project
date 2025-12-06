@@ -96,26 +96,27 @@
 
 // export default Navbar;
 
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { assets } from '../assets/assets';
 import { NavLink, useNavigate } from 'react-router-dom';
+import { AppContext } from '../context/AppContext';
 
 const HamburgerIcon = () => (
   <svg width="28" height="28" viewBox="0 0 24 24">
-    <path d="M3 6h18M3 12h18M3 18h18" stroke="black" strokeWidth="2" strokeLinecap="round"/>
+    <path d="M3 6h18M3 12h18M3 18h18" stroke="black" strokeWidth="2" strokeLinecap="round" />
   </svg>
 );
 
 const CrossIcon = () => (
   <svg width="28" height="28" viewBox="0 0 24 24">
-    <path d="M6 6l12 12M6 18L18 6" stroke="black" strokeWidth="2" strokeLinecap="round"/>
+    <path d="M6 6l12 12M6 18L18 6" stroke="black" strokeWidth="2" strokeLinecap="round" />
   </svg>
 );
 
 const Navbar = () => {
   const navigate = useNavigate();
   const [showMenu, setShowMenu] = useState(false);
-  const [token, setToken] = useState(true);
+  const { token, logout } = useContext(AppContext);
 
   const linkStyle =
     "relative py-1 after:content-[''] after:absolute after:left-0 after:bottom-0 after:h-[2px] after:w-0 after:bg-blue-600 after:transition-all after:duration-300 hover:after:w-full";
@@ -140,6 +141,7 @@ const Navbar = () => {
         <NavLink to="/doctors" className={({ isActive }) => (isActive ? activeStyle : linkStyle)}><li>ALL DOCTORS</li></NavLink>
         <NavLink to="/about" className={({ isActive }) => (isActive ? activeStyle : linkStyle)}><li>ABOUT</li></NavLink>
         <NavLink to="/contact" className={({ isActive }) => (isActive ? activeStyle : linkStyle)}><li>CONTACT</li></NavLink>
+        <a href="http://localhost:5174" target="_blank" rel="noopener noreferrer" className={linkStyle}><li>ADMIN PANEL</li></a>
       </ul>
 
       {/* Desktop Profile */}
@@ -154,7 +156,7 @@ const Navbar = () => {
               <div className="min-w-48 bg-stone-100 rounded flex flex-col gap-4 p-4">
                 <p onClick={() => navigate('my-profile')} className="hover:text-black cursor-pointer">My Profile</p>
                 <p onClick={() => navigate('my-appointments')} className="hover:text-black cursor-pointer">My Appointments</p>
-                <p onClick={() => setToken(false)} className="hover:text-black cursor-pointer">Logout</p>
+                <p onClick={() => logout()} className="hover:text-black cursor-pointer">Logout</p>
               </div>
             </div>
           </div>
@@ -180,12 +182,13 @@ const Navbar = () => {
           <NavLink to="/doctors" onClick={() => setShowMenu(false)}>ALL DOCTORS</NavLink>
           <NavLink to="/about" onClick={() => setShowMenu(false)}>ABOUT</NavLink>
           <NavLink to="/contact" onClick={() => setShowMenu(false)}>CONTACT</NavLink>
+          <a href="http://localhost:5174" target="_blank" rel="noopener noreferrer" onClick={() => setShowMenu(false)}>ADMIN PANEL</a>
 
           {token ? (
             <>
               <p onClick={() => { navigate('my-profile'); setShowMenu(false); }}>My Profile</p>
               <p onClick={() => { navigate('my-appointments'); setShowMenu(false); }}>My Appointments</p>
-              <p onClick={() => setToken(false)}>Logout</p>
+              <p onClick={() => { logout(); setShowMenu(false); }}>Logout</p>
             </>
           ) : (
             <button

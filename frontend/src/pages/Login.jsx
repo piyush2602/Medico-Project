@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { AppContext } from "../context/AppContext";
 
 const Auth = () => {
   const navigate = useNavigate();
+  const { register, login } = useContext(AppContext);
 
   // Toggle between Login and Signup
   const [isLogin, setIsLogin] = useState(true);
@@ -13,12 +15,22 @@ const Auth = () => {
   const [password, setPassword] = useState("");
 
   // Handle submit
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    let success = false;
+
     if (isLogin) {
-      console.log("Login:", { email, password });
+      // Login
+      success = await login(email, password);
     } else {
-      console.log("Signup:", { fullName, email, password });
+      // Register
+      success = await register(fullName, email, password);
+    }
+
+    // Navigate to home on success
+    if (success) {
+      navigate('/');
     }
   };
 
@@ -91,7 +103,7 @@ const Auth = () => {
         <p className="text-gray-600 text-sm text-center mt-6">
           {isLogin ? (
             <>
-              Don’t have an account?{" "}
+              Don't have an account?{" "}
               <span
                 onClick={() => setIsLogin(false)}
                 className="text-indigo-600 cursor-pointer hover:underline"

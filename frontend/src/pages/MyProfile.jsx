@@ -1,21 +1,39 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { assets } from "../assets/assets";
+import { AppContext } from "../context/AppContext";
 
 const MyProfile = () => {
-  const [userData, setUserData] = useState({
-    name: "Edward Vincent",
-    image: assets.profile_pic,
-    email: "richardjameswap@gmail.com",
-    phone: "+1 123 456 7890",
-    address: {
-      line1: "57th Cross, Richmond",
-      line2: "Circle, Church Road, London",
-    },
-    gender: "Male",
-    dob: "2024-07-20",
-  });
+  const { userData, setUserData, updateProfile } = useContext(AppContext);
 
   const [isEdit, setIsEdit] = useState(false);
+  const [image, setImage] = useState(null);
+
+  // Initialize with default values if userData is null
+  const displayData = userData || {
+    name: "",
+    image: assets.profile_pic,
+    email: "",
+    phone: "0000000000",
+    address: { line1: "", line2: "" },
+    gender: "Not Selected",
+    dob: "Not Selected"
+  };
+
+  // Handle save profile
+  const handleSave = async () => {
+    const success = await updateProfile(
+      userData.name,
+      userData.phone,
+      userData.address,
+      userData.dob,
+      userData.gender,
+      image
+    )
+    if (success) {
+      setIsEdit(false)
+      setImage(null)
+    }
+  }
 
   return (
     <div className="w-full flex justify-center py-10 px-5">
@@ -23,25 +41,43 @@ const MyProfile = () => {
 
         {/* Profile Picture + Name */}
         <div className="flex items-center gap-5 mb-8">
-          <img
-            src={userData.image}
-            className="w-28 h-28 rounded-xl object-cover"
-            alt="profile"
-          />
+          {isEdit ? (
+            <label htmlFor="image" className="cursor-pointer">
+              <img
+                src={image ? URL.createObjectURL(image) : displayData.image}
+                className="w-28 h-28 rounded-xl object-cover"
+                alt="profile"
+              />
+              <input
+                type="file"
+                id="image"
+                hidden
+                onChange={(e) => setImage(e.target.files[0])}
+                accept="image/*"
+              />
+              <p className="text-xs text-gray-500 mt-1 text-center">Click to change</p>
+            </label>
+          ) : (
+            <img
+              src={displayData.image}
+              className="w-28 h-28 rounded-xl object-cover"
+              alt="profile"
+            />
+          )}
           {isEdit ? (
             <input
               type="text"
-              value={userData.name}
+              value={displayData.name}
               onChange={(e) =>
                 setUserData((prev) => ({ ...prev, name: e.target.value }))
               }
               className="border p-2 rounded-lg w-60"
             />
           ) : (
-            <h1 className="text-2xl font-semibold">{userData.name}</h1>
+            <h1 className="text-2xl font-semibold">{displayData.name}</h1>
           )}
         </div>
-<hr />
+        <hr />
         {/* Contact Information Section */}
         <p className="text-gray-600 text-sm font-semibold underline mb-3">
           CONTACT INFORMATION
@@ -51,21 +87,21 @@ const MyProfile = () => {
 
           {/* Email */}
           <p className="text-gray-600">Email id:</p>
-          <p className="text-blue-500">{userData.email}</p>
+          <p className="text-blue-500">{displayData.email}</p>
 
           {/* Phone */}
           <p className="text-gray-600">Phone:</p>
           {isEdit ? (
             <input
               type="text"
-              value={userData.phone}
+              value={displayData.phone}
               onChange={(e) =>
                 setUserData((prev) => ({ ...prev, phone: e.target.value }))
               }
               className="border p-2 rounded"
             />
           ) : (
-            <p className="text-blue-500">{userData.phone}</p>
+            <p className="text-blue-500">{displayData.phone}</p>
           )}
 
           {/* Address */}
@@ -74,7 +110,7 @@ const MyProfile = () => {
             <div className="flex flex-col gap-2">
               <input
                 type="text"
-                value={userData.address.line1}
+                value={displayData.address.line1}
                 onChange={(e) =>
                   setUserData((prev) => ({
                     ...prev,
@@ -85,7 +121,7 @@ const MyProfile = () => {
               />
               <input
                 type="text"
-                value={userData.address.line2}
+                value={displayData.address.line2}
                 onChange={(e) =>
                   setUserData((prev) => ({
                     ...prev,
@@ -97,8 +133,8 @@ const MyProfile = () => {
             </div>
           ) : (
             <p>
-              {userData.address.line1} <br />
-              {userData.address.line2}
+              {displayData.address.line1} <br />
+              {displayData.address.line2}
             </p>
           )}
         </div>
@@ -115,7 +151,7 @@ const MyProfile = () => {
           {isEdit ? (
             <select
               className="border p-2 rounded w-40"
-              value={userData.gender}
+              value={displayData.gender}
               onChange={(e) =>
                 setUserData((prev) => ({ ...prev, gender: e.target.value }))
               }
@@ -124,7 +160,7 @@ const MyProfile = () => {
               <option>Female</option>
             </select>
           ) : (
-            <p>{userData.gender}</p>
+            <p>{displayData.gender}</p>
           )}
 
           {/* Birthday */}
@@ -133,18 +169,18 @@ const MyProfile = () => {
             <input
               type="date"
               className="border p-2 rounded w-48"
-              value={userData.dob}
+              value={displayData.dob}
               onChange={(e) =>
                 setUserData((prev) => ({ ...prev, dob: e.target.value }))
               }
             />
           ) : (
             <p>
-              {new Date(userData.dob).toLocaleDateString("en-US", {
+              {displayData.dob !== "Not Selected" ? new Date(displayData.dob).toLocaleDateString("en-US", {
                 day: "2-digit",
                 month: "long",
                 year: "numeric",
-              })}
+              }) : "Not Selected"}
             </p>
           )}
         </div>
@@ -153,7 +189,7 @@ const MyProfile = () => {
         <div className="flex gap-4 mt-10">
           {isEdit ? (
             <button
-              onClick={() => setIsEdit(false)}
+              onClick={handleSave}
               className="px-6 py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700"
             >
               Save information

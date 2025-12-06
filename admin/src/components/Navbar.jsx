@@ -11,7 +11,7 @@ const Navbar = () => {
     const logout = () => {
         aToken && setAToken('')
         aToken && localStorage.removeItem('aToken')
-        window.location.href = 'http://localhost:5173'
+        window.location.href = 'https://medico-frontend-qqf6.onrender.com'
     }
 
     return (

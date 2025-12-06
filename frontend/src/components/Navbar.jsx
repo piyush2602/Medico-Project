@@ -141,7 +141,7 @@ const Navbar = () => {
         <NavLink to="/doctors" className={({ isActive }) => (isActive ? activeStyle : linkStyle)}><li>ALL DOCTORS</li></NavLink>
         <NavLink to="/about" className={({ isActive }) => (isActive ? activeStyle : linkStyle)}><li>ABOUT</li></NavLink>
         <NavLink to="/contact" className={({ isActive }) => (isActive ? activeStyle : linkStyle)}><li>CONTACT</li></NavLink>
-        <a href="http://localhost:5174" target="_blank" rel="noopener noreferrer" className={linkStyle}><li>ADMIN PANEL</li></a>
+        <a href="https://medico-admin-zpnw.onrender.com" target="_blank" rel="noopener noreferrer" className={linkStyle}><li>ADMIN PANEL</li></a>
       </ul>
 
       {/* Desktop Profile */}
@@ -182,7 +182,7 @@ const Navbar = () => {
           <NavLink to="/doctors" onClick={() => setShowMenu(false)}>ALL DOCTORS</NavLink>
           <NavLink to="/about" onClick={() => setShowMenu(false)}>ABOUT</NavLink>
           <NavLink to="/contact" onClick={() => setShowMenu(false)}>CONTACT</NavLink>
-          <a href="http://localhost:5174" target="_blank" rel="noopener noreferrer" onClick={() => setShowMenu(false)}>ADMIN PANEL</a>
+          <a href="https://medico-admin-zpnw.onrender.com" target="_blank" rel="noopener noreferrer" onClick={() => setShowMenu(false)}>ADMIN PANEL</a>
 
           {token ? (
             <>

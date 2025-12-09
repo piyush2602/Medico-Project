@@ -156,6 +156,7 @@ const Navbar = () => {
               <div className="min-w-48 bg-stone-100 rounded flex flex-col gap-4 p-4">
                 <p onClick={() => navigate('my-profile')} className="hover:text-black cursor-pointer">My Profile</p>
                 <p onClick={() => navigate('my-appointments')} className="hover:text-black cursor-pointer">My Appointments</p>
+                <p onClick={() => window.open('https://skymeet-6prd.onrender.com/', '_blank')} className="hover:text-black cursor-pointer">Doctor Meet</p>
                 <p onClick={() => logout()} className="hover:text-black cursor-pointer">Logout</p>
               </div>
             </div>
@@ -188,6 +189,7 @@ const Navbar = () => {
             <>
               <p onClick={() => { navigate('my-profile'); setShowMenu(false); }}>My Profile</p>
               <p onClick={() => { navigate('my-appointments'); setShowMenu(false); }}>My Appointments</p>
+              <p onClick={() => { window.open('https://skymeet-6prd.onrender.com/', '_blank'); setShowMenu(false); }}>Doctor Meet</p>
               <p onClick={() => { logout(); setShowMenu(false); }}>Logout</p>
             </>
           ) : (

@@ -5,20 +5,22 @@ import 'react-toastify/dist/ReactToastify.css';
 import { AdminContext } from './context/AdminContext';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, useLocation } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
 import AllAppointments from './pages/AllAppointments';
 import AddDoctor from './pages/AddDoctor';
 import DoctorsList from './pages/DoctorsList';
+import VirtualMeet from './pages/VirtualMeet';
 
 const App = () => {
 
   const { aToken } = useContext(AdminContext)
+  const location = useLocation()
 
   return aToken ? (
     <div className='bg-[#F8F9FD]'>
       <ToastContainer />
-      <Navbar />
+      {location.pathname !== '/virtual-meet' && <Navbar />}
       <div className='flex items-start'>
         <Sidebar />
         <Routes>
@@ -27,6 +29,7 @@ const App = () => {
           <Route path='/all-appointments' element={<AllAppointments />} />
           <Route path='/add-doctor' element={<AddDoctor />} />
           <Route path='/doctor-list' element={<DoctorsList />} />
+          <Route path='/virtual-meet' element={<VirtualMeet />} />
         </Routes>
       </div>
     </div>

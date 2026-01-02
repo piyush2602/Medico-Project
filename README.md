@@ -18,8 +18,6 @@
 
 ---
 
-## 📸 Screenshots
-
 ### 🏠 Homepage
 ![Medico Homepage](C:/Users/piyus/.gemini/antigravity/brain/bba88823-cbc7-4498-bd3f-40829101b507/medico_homepage_screenshot_1765047966469.png)
 
@@ -219,4 +217,5 @@ This project is deployed on **Render**. See [DEPLOYMENT.md](./DEPLOYMENT.md) for
 <div align="center">
 Made with ❤️ by Piyush
 </div>
+
 

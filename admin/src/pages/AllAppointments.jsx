@@ -4,7 +4,7 @@ import { assets } from '../assets/assets'
 
 const AllAppointments = () => {
 
-    const { aToken, appointments, getAllAppointments, cancelAppointment } = useContext(AdminContext)
+    const { aToken, appointments, getAllAppointments, cancelAppointment, completeAppointment } = useContext(AdminContext)
 
     useEffect(() => {
         if (aToken) {
@@ -44,7 +44,10 @@ const AllAppointments = () => {
                                 ? <p className='text-red-400 text-xs font-medium'>Cancelled</p>
                                 : item.isCompleted
                                     ? <p className='text-green-500 text-xs font-medium'>Completed</p>
-                                    : <img onClick={() => cancelAppointment(item._id)} className='w-10 cursor-pointer' src={assets.cancel_icon} alt="" />
+                                    : <div className='flex items-center gap-2'>
+                                        <img onClick={() => completeAppointment(item._id)} className='w-10 cursor-pointer' src={assets.tick_icon} alt="Complete" />
+                                        <img onClick={() => cancelAppointment(item._id)} className='w-10 cursor-pointer' src={assets.cancel_icon} alt="Cancel" />
+                                      </div>
                         }
                     </div>
                 ))}

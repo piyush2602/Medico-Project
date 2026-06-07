@@ -79,7 +79,7 @@ const loginAdmin = async(req,res) => {
         res.json({success:false,message:error.message})
         }
 }
-export { addDoctor, loginAdmin, allDoctors, changeAvailability, appointmentsAdmin, appointmentCancel, adminDashboard }
+export { addDoctor, loginAdmin, allDoctors, changeAvailability, appointmentsAdmin, appointmentCancel, appointmentComplete, adminDashboard }
 
 // api for getting all doctors list for admin panel
 const allDoctors = async (req, res) => {
@@ -134,6 +134,18 @@ const appointmentCancel = async (req, res) => {
         await doctorModel.findByIdAndUpdate(docId, { slots_booked })
         
         res.json({ success: true, message: 'Appointment cancelled' })
+    } catch (error) {
+        console.log(error)
+        res.json({ success: false, message: error.message })
+    }
+}
+
+// api to complete appointment 
+const appointmentComplete = async (req, res) => {
+    try {
+        const { appointmentId } = req.body
+        await appointmentModel.findByIdAndUpdate(appointmentId, { isCompleted: true })
+        res.json({ success: true, message: 'Appointment completed' })
     } catch (error) {
         console.log(error)
         res.json({ success: false, message: error.message })

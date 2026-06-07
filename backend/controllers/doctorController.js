@@ -1,6 +1,7 @@
 import doctorModel from "../models/doctorModel.js"
 import { GoogleGenerativeAI } from "@google/generative-ai"
 import http from "http"
+import https from "https"
 
 // ─── ML service call ─────────────────────────────────────────────────────────
 const callMLService = (symptoms) => {
@@ -17,7 +18,8 @@ const callMLService = (symptoms) => {
             headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) },
             timeout: 5000
         }
-        const req = http.request(options, (res) => {
+        const requestModule = parsedUrl.protocol === 'https:' ? https : http;
+        const req = requestModule.request(options, (res) => {
             let data = ''
             res.on('data', chunk => data += chunk)
             res.on('end', () => {
@@ -231,7 +233,8 @@ const callMLReportAnalyzer = (text) => {
             headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) },
             timeout: 8000
         }
-        const req = http.request(options, (res) => {
+        const requestModule = parsedUrl.protocol === 'https:' ? https : http;
+        const req = requestModule.request(options, (res) => {
             let data = ''
             res.on('data', chunk => data += chunk)
             res.on('end', () => {

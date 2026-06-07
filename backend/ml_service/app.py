@@ -311,6 +311,10 @@ def keyword_classify(symptoms):
 
 
 # ─── Routes ───────────────────────────────────────────────────────────────────
+@app.route('/', methods=['GET'])
+def home():
+    return "<h1>Medico ML Service</h1><p>The ML Service is running successfully!</p>"
+
 @app.route('/health', methods=['GET'])
 def health():
     return jsonify({

@@ -6,9 +6,12 @@ import http from "http"
 const callMLService = (symptoms) => {
     return new Promise((resolve, reject) => {
         const body = JSON.stringify({ symptoms })
+        const mlUrl = process.env.ML_SERVICE_URL || 'https://medico-project-o7vv.onrender.com'
+        const parsedUrl = new URL(mlUrl)
+        
         const options = {
-            hostname: 'localhost',
-            port: 5001,
+            hostname: parsedUrl.hostname,
+            port: parsedUrl.port || (parsedUrl.protocol === 'https:' ? 443 : 80),
             path: '/predict',
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) },
@@ -65,7 +68,7 @@ const SYMPTOM_MAP = [
     },
     {
         speciality: 'General physician',
-        keywords: ['fever', 'cold', 'cough', 'flu', 'fatigue', 'weakness', 'tired', 'pain', 'infection', 'diabetes', 'hypertension', 'blood pressure', 'cholesterol', 'thyroid', 'weight', 'general', 'check up', 'checkup', 'routine']
+        keywords: ['fever', 'cold', 'cough', 'flu', 'fatigue', 'weakness', 'tired', 'infection', 'diabetes', 'hypertension', 'blood pressure', 'cholesterol', 'thyroid', 'weight', 'general', 'check up', 'checkup', 'routine']
     },
     {
         speciality: 'Dentist',
@@ -217,8 +220,13 @@ Respond ONLY with valid JSON in this exact format (no markdown, no code block):
 const callMLReportAnalyzer = (text) => {
     return new Promise((resolve, reject) => {
         const body = JSON.stringify({ text: text.substring(0, 6000) })
+        const mlUrl = process.env.ML_SERVICE_URL || 'https://medico-project-o7vv.onrender.com'
+        const parsedUrl = new URL(mlUrl)
+        
         const options = {
-            hostname: 'localhost', port: 5001, path: '/analyze-report',
+            hostname: parsedUrl.hostname,
+            port: parsedUrl.port || (parsedUrl.protocol === 'https:' ? 443 : 80),
+            path: '/analyze-report',
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) },
             timeout: 8000

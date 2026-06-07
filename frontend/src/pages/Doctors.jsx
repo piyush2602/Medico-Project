@@ -169,6 +169,42 @@ const Doctors = () => {
   Gastroenterologist
 </p>
 
+<p
+  onClick={() =>
+    speciality === "Dentist"
+      ? navigate("/doctors")
+      : navigate("/doctors/Dentist")
+  }
+  className={`w-[94vw] sm:w-auto pl-3 py-1.5 pr-16 border border-gray-300 rounded cursor-pointer 
+    ${speciality === "Dentist" ? "bg-indigo-100 text-black" : ""}`}
+>
+  Dentist
+</p>
+
+<p
+  onClick={() =>
+    speciality === "Orthopedic"
+      ? navigate("/doctors")
+      : navigate("/doctors/Orthopedic")
+  }
+  className={`w-[94vw] sm:w-auto pl-3 py-1.5 pr-16 border border-gray-300 rounded cursor-pointer 
+    ${speciality === "Orthopedic" ? "bg-indigo-100 text-black" : ""}`}
+>
+  Orthopedic
+</p>
+
+<p
+  onClick={() =>
+    speciality === "Cardiologist"
+      ? navigate("/doctors")
+      : navigate("/doctors/Cardiologist")
+  }
+  className={`w-[94vw] sm:w-auto pl-3 py-1.5 pr-16 border border-gray-300 rounded cursor-pointer 
+    ${speciality === "Cardiologist" ? "bg-indigo-100 text-black" : ""}`}
+>
+  Cardiologist
+</p>
+
         </div>
 
         {/* RIGHT - DOCTOR CARDS */}

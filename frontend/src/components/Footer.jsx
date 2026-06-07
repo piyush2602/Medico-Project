@@ -43,7 +43,7 @@ const Footer = () => {
       <div>
         <hr />
         <p className='text-center py-4 text-black text-sm'>
-          Copyright © 2024 GreatStack - All Right Reserved.
+          Copyright © 2025 Piyush Agrawal - All Right Reserved.
         </p>
       </div>
 

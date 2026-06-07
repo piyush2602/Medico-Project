@@ -42,7 +42,7 @@ const Contact = () => {
           {/* Careers */}
           <div>
             <h2 className="text-xl font-semibold mb-4">
-              CAREERS AT PRESCRIPTO
+              CAREERS AT MEDICO
             </h2>
 
             <p className="text-gray-700 leading-relaxed text-sm">

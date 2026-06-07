@@ -141,6 +141,7 @@ const Navbar = () => {
         <NavLink to="/doctors" className={({ isActive }) => (isActive ? activeStyle : linkStyle)}><li>ALL DOCTORS</li></NavLink>
         <NavLink to="/about" className={({ isActive }) => (isActive ? activeStyle : linkStyle)}><li>ABOUT</li></NavLink>
         <NavLink to="/contact" className={({ isActive }) => (isActive ? activeStyle : linkStyle)}><li>CONTACT</li></NavLink>
+        <NavLink to="/ai-recommendation" className={({ isActive }) => isActive ? activeStyle : linkStyle}><li style={{color:'#818cf8', fontWeight:700}}>✨ AI DOCTOR</li></NavLink>
         <a href="https://medico-admin-zpnw.onrender.com" target="_blank" rel="noopener noreferrer" className={linkStyle}><li>ADMIN PANEL</li></a>
       </ul>
 
@@ -183,6 +184,7 @@ const Navbar = () => {
           <NavLink to="/doctors" onClick={() => setShowMenu(false)}>ALL DOCTORS</NavLink>
           <NavLink to="/about" onClick={() => setShowMenu(false)}>ABOUT</NavLink>
           <NavLink to="/contact" onClick={() => setShowMenu(false)}>CONTACT</NavLink>
+          <NavLink to="/ai-recommendation" onClick={() => setShowMenu(false)} style={{color:'#818cf8', fontWeight:700}}>✨ AI DOCTOR</NavLink>
           <a href="https://medico-admin-zpnw.onrender.com" target="_blank" rel="noopener noreferrer" onClick={() => setShowMenu(false)}>ADMIN PANEL</a>
 
           {token ? (

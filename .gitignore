@@ -30,3 +30,8 @@ Thumbs.db
 
 # Cloudinary uploads (if any local testing)
 uploads/
+
+# ML Service & OCR
+__pycache__/
+*.traineddata
+*.pkl

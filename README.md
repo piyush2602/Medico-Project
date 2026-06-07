@@ -1,4 +1,4 @@
-﻿<div align="center">
+<div align="center">
 
 # 🏥 Medico - Healthcare Appointment System
 
@@ -39,6 +39,16 @@
 - ✅ Toggle doctor availability
 - 📈 View statistics and insights
 
+### 🤖 **AI & Machine Learning Integration**
+- **AI Symptom Checker:** Users can type their symptoms to get an instant AI-powered recommendation for the right medical specialist. Powered by **Google Gemini 2.0 Flash**.
+- **Medical Report Analyzer:** Users can upload lab reports (PDF, JPG, PNG) for automated analysis.
+  - Features **Tesseract.js OCR** for image-based reports and **pdf-parse** for PDFs.
+  - Automatically extracts lab values and highlights `LOW`, `NORMAL`, and `HIGH` parameters with color-coded UI indicators.
+- **Robust 3-Layer Fallback Architecture:** Ensures AI features are always available.
+  - *Layer 1:* Primary analysis via Google Gemini API.
+  - *Layer 2:* Custom Python Flask ML Microservice (uses **Naive Bayes** and regex extraction) for offline/fallback analysis.
+  - *Layer 3:* Local Keyword-Priority heuristic fallback.
+
 ---
 
 ## 🚀 Live Deployment
@@ -61,15 +71,15 @@
 - **Tailwind CSS** - Styling
 - **React Toastify** - Notifications
 
-### Backend
-- **Node.js** - Runtime environment
-- **Express.js** - Web framework
-- **MongoDB** - Database
-- **Mongoose** - ODM
-- **JWT** - Authentication
-- **Bcrypt** - Password hashing
-- **Multer** - File uploads
-- **Cloudinary** - Image storage
+### Backend & ML Service
+- **Node.js & Express.js** - Main API server
+- **Python & Flask** - ML Microservice
+- **MongoDB & Mongoose** - Database & ODM
+- **Google Gemini API** - LLM-powered report & symptom analysis
+- **Tesseract.js** - Image OCR for medical reports
+- **Scikit-learn** - Naive Bayes ML model for text classification
+- **JWT & Bcrypt** - Authentication & Security
+- **Multer & Cloudinary** - File uploads & Storage
 
 ---
 
@@ -86,72 +96,7 @@ Medico/
 
 ---
 
-## 💻 Local Development
 
-### Prerequisites
-- Node.js (v14+)
-- MongoDB
-- npm or yarn
-
-### Installation
-
-1. **Clone the repository**
-```bash
-git clone https://github.com/piyush2602/Medico-Project.git
-cd Medico
-```
-
-2. **Setup Backend**
-```bash
-cd backend
-npm install
-
-# Create .env file with:
-# MONGODB_URI=your_mongodb_connection_string
-# JWT_SECRET=your_jwt_secret
-# CLOUDINARY_NAME=your_cloudinary_name
-# CLOUDINARY_API_KEY=your_cloudinary_api_key
-# CLOUDINARY_API_SECRET=your_cloudinary_api_secret
-# ADMIN_EMAIL=admin@medico.com
-# ADMIN_PASSWORD=your_admin_password
-
-npm run server
-```
-
-3. **Setup Frontend**
-```bash
-cd ../frontend
-npm install
-
-# Create .env file with:
-# VITE_BACKEND_URL=http://localhost:4000
-
-npm run dev
-```
-
-4. **Setup Admin Panel**
-```bash
-cd ../admin
-npm install
-
-# Create .env file with:
-# VITE_BACKEND_URL=http://localhost:4000
-
-npm run dev
-```
-
-### Access the Application
-- **Frontend**: http://localhost:5173
-- **Admin Panel**: http://localhost:5174
-- **Backend API**: http://localhost:4000
-
----
-
-## 🔐 Admin Credentials
-
-For the deployed version, use the admin credentials you set up during backend configuration.
-
----
 
 ## 📝 API Endpoints
 

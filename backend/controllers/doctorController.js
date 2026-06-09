@@ -1,7 +1,10 @@
 import doctorModel from "../models/doctorModel.js"
+import appointmentModel from "../models/appointmentModel.js"
 import { GoogleGenerativeAI } from "@google/generative-ai"
 import http from "http"
 import https from "https"
+import bcrypt from "bcrypt"
+import jwt from "jsonwebtoken"
 
 // ─── ML service call ─────────────────────────────────────────────────────────
 const callMLService = (symptoms) => {
@@ -445,4 +448,118 @@ Respond ONLY with valid JSON (no markdown, no code fences):
     }
 }
 
-export { changeAvailability, doctorList, recommendDoctor, analyzeReport }
+// new doctor functions defined below — export at bottom of file
+
+// ─── Doctor Login ──────────────────────────────────────────────────────────────
+const loginDoctor = async (req, res) => {
+    try {
+        const { email, password } = req.body
+        const doctor = await doctorModel.findOne({ email })
+
+        if (!doctor) {
+            return res.json({ success: false, message: 'Doctor not found' })
+        }
+
+        const isMatch = await bcrypt.compare(password, doctor.password)
+
+        if (!isMatch) {
+            return res.json({ success: false, message: 'Invalid credentials' })
+        }
+
+        const token = jwt.sign({ id: doctor._id }, process.env.JWT_SECRET)
+        res.json({ success: true, token })
+
+    } catch (error) {
+        console.log(error)
+        res.json({ success: false, message: error.message })
+    }
+}
+
+// ─── Get Doctor's Own Appointments ────────────────────────────────────────────
+const getDocAppointments = async (req, res) => {
+    try {
+        const { docId } = req.body
+        const appointments = await appointmentModel.find({ docId })
+        res.json({ success: true, appointments: appointments.reverse() })
+    } catch (error) {
+        console.log(error)
+        res.json({ success: false, message: error.message })
+    }
+}
+
+// ─── Doctor Cancel Appointment ────────────────────────────────────────────────
+const docCancelAppointment = async (req, res) => {
+    try {
+        const { docId, appointmentId } = req.body
+        const appointmentData = await appointmentModel.findById(appointmentId)
+
+        if (!appointmentData || appointmentData.docId !== docId) {
+            return res.json({ success: false, message: 'Unauthorized action' })
+        }
+
+        await appointmentModel.findByIdAndUpdate(appointmentId, { cancelled: true })
+
+        // Release the doctor slot
+        const { slotDate, slotTime } = appointmentData
+        const doctorData = await doctorModel.findById(docId)
+        let slots_booked = doctorData.slots_booked
+        slots_booked[slotDate] = slots_booked[slotDate].filter(e => e !== slotTime)
+        await doctorModel.findByIdAndUpdate(docId, { slots_booked })
+
+        res.json({ success: true, message: 'Appointment cancelled' })
+    } catch (error) {
+        console.log(error)
+        res.json({ success: false, message: error.message })
+    }
+}
+
+// ─── Doctor Complete Appointment ──────────────────────────────────────────────
+const docCompleteAppointment = async (req, res) => {
+    try {
+        const { docId, appointmentId } = req.body
+        const appointmentData = await appointmentModel.findById(appointmentId)
+
+        if (!appointmentData || appointmentData.docId !== docId) {
+            return res.json({ success: false, message: 'Unauthorized action' })
+        }
+
+        await appointmentModel.findByIdAndUpdate(appointmentId, { isCompleted: true })
+        res.json({ success: true, message: 'Appointment completed' })
+    } catch (error) {
+        console.log(error)
+        res.json({ success: false, message: error.message })
+    }
+}
+
+// ─── Save Prescription ────────────────────────────────────────────────────────
+const savePrescription = async (req, res) => {
+    try {
+        const { docId, appointmentId, prescription } = req.body
+        const appointmentData = await appointmentModel.findById(appointmentId)
+
+        if (!appointmentData || appointmentData.docId !== docId) {
+            return res.json({ success: false, message: 'Unauthorized action' })
+        }
+
+        prescription.createdAt = new Date().toISOString()
+        await appointmentModel.findByIdAndUpdate(appointmentId, { prescription })
+        res.json({ success: true, message: 'Prescription saved successfully' })
+    } catch (error) {
+        console.log(error)
+        res.json({ success: false, message: error.message })
+    }
+}
+
+// ─── Get Doctor Profile ───────────────────────────────────────────────────────
+const getDocProfile = async (req, res) => {
+    try {
+        const { docId } = req.body
+        const doctor = await doctorModel.findById(docId).select('-password')
+        res.json({ success: true, docData: doctor })
+    } catch (error) {
+        console.log(error)
+        res.json({ success: false, message: error.message })
+    }
+}
+
+export { changeAvailability, doctorList, recommendDoctor, analyzeReport, loginDoctor, getDocAppointments, docCancelAppointment, docCompleteAppointment, savePrescription, getDocProfile }

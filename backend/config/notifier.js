@@ -1,40 +1,38 @@
-import nodemailer from 'nodemailer';
+import axios from 'axios';
 import 'dotenv/config';
 
-// Create a reusable transporter object using the default SMTP transport
-const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true, // true for 465, false for other ports
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    },
-    // Force Node to use IPv4 instead of IPv6 (fixes ENETUNREACH on Render)
-    tls: { rejectUnauthorized: false },
-    family: 4 
-});
-
-// Helper function to send email
-const sendMail = async (to, subject, html) => {
+// Helper function to send email via Brevo HTTP API
+const sendMail = async (to, subject, htmlContent) => {
     try {
-        if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-            console.warn("⚠️ EMAIL_USER or EMAIL_PASS is not set in .env. Skipping email to:", to);
+        if (!process.env.BREVO_API_KEY || !process.env.EMAIL_USER) {
+            console.warn("⚠️ BREVO_API_KEY or EMAIL_USER is not set in .env. Skipping email to:", to);
             return false;
         }
-        
-        const mailOptions = {
-            from: `"Medico Notifications" <${process.env.EMAIL_USER}>`,
-            to,
-            subject,
-            html
+
+        const data = {
+            sender: {
+                name: "Medico Notifications",
+                email: process.env.EMAIL_USER
+            },
+            to: [
+                { email: to }
+            ],
+            subject: subject,
+            htmlContent: htmlContent
         };
 
-        const info = await transporter.sendMail(mailOptions);
-        console.log("Email sent: %s", info.messageId);
+        const response = await axios.post('https://api.brevo.com/v3/smtp/email', data, {
+            headers: {
+                'accept': 'application/json',
+                'api-key': process.env.BREVO_API_KEY,
+                'content-type': 'application/json'
+            }
+        });
+
+        console.log("Email sent via Brevo:", response.data.messageId);
         return true;
     } catch (error) {
-        console.error("Error sending email to", to, ":", error);
+        console.error("Error sending email to", to, ":", error.response?.data || error.message);
         return false;
     }
 };

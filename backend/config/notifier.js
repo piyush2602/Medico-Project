@@ -3,11 +3,16 @@ import 'dotenv/config';
 
 // Create a reusable transporter object using the default SMTP transport
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true, // true for 465, false for other ports
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
-    }
+    },
+    // Force Node to use IPv4 instead of IPv6 (fixes ENETUNREACH on Render)
+    tls: { rejectUnauthorized: false },
+    family: 4 
 });
 
 // Helper function to send email

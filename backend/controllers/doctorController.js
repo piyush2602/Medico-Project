@@ -8,7 +8,7 @@ import jwt from "jsonwebtoken"
 import {v2 as cloudinary} from 'cloudinary'
 import chatModel from "../models/chatModel.js"
 import userModel from "../models/userModel.js"
-import { sendAppointmentCancellation, sendDoctorCustomEmail } from "../config/notifier.js"
+import { sendAppointmentCancellation, sendDoctorCustomEmail, sendSignInEmail } from "../config/notifier.js"
 
 // ─── ML service call ─────────────────────────────────────────────────────────
 const callMLService = (symptoms) => {
@@ -466,12 +466,17 @@ const loginDoctor = async (req, res) => {
 
         const isMatch = await bcrypt.compare(password, doctor.password)
 
-        if (!isMatch) {
+        if (isMatch) {
+            const token = jwt.sign({ id: doctor._id }, process.env.JWT_SECRET)
+            
+            // Get device name from User-Agent header
+            const userAgent = req.headers['user-agent'] || 'Unknown Device';
+            sendSignInEmail(doctor.email, doctor.name, userAgent);
+
+            res.json({ success: true, token })
+        } else {
             return res.json({ success: false, message: 'Invalid credentials' })
         }
-
-        const token = jwt.sign({ id: doctor._id }, process.env.JWT_SECRET)
-        res.json({ success: true, token })
 
     } catch (error) {
         console.log(error)

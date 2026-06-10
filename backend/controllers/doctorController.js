@@ -5,6 +5,8 @@ import http from "http"
 import https from "https"
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
+import {v2 as cloudinary} from 'cloudinary'
+import chatModel from "../models/chatModel.js"
 
 // ─── ML service call ─────────────────────────────────────────────────────────
 const callMLService = (symptoms) => {
@@ -562,4 +564,75 @@ const getDocProfile = async (req, res) => {
     }
 }
 
-export { changeAvailability, doctorList, recommendDoctor, analyzeReport, loginDoctor, getDocAppointments, docCancelAppointment, docCompleteAppointment, savePrescription, getDocProfile }
+// ─── Get Doctor Chat History ──────────────────────────────────────────────────
+const getDocChatHistory = async (req, res) => {
+    try {
+        const { appointmentId, docId } = req.body;
+        // Verify doctor owns the appointment
+        const appointmentData = await appointmentModel.findById(appointmentId);
+        if (!appointmentData || appointmentData.docId !== docId) {
+            return res.json({ success: false, message: 'Unauthorized action' });
+        }
+        const messages = await chatModel.find({ appointmentId }).sort({ timestamp: 1 });
+        res.json({ success: true, messages });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: error.message });
+    }
+}
+
+// ─── Upload Doctor Chat Attachment ────────────────────────────────────────────
+const uploadDocChatAttachment = async (req, res) => {
+    try {
+        const imageFile = req.file;
+        const { appointmentId, docId } = req.body;
+        
+        // Verify doctor owns the appointment
+        const appointmentData = await appointmentModel.findById(appointmentId);
+        if (!appointmentData || appointmentData.docId !== docId) {
+            return res.json({ success: false, message: 'Unauthorized action' });
+        }
+
+        if (!imageFile) {
+            return res.json({ success: false, message: "No file provided" });
+        }
+        
+        const isPdf = imageFile.mimetype === 'application/pdf';
+        const fileUpload = await cloudinary.uploader.upload(imageFile.path, { 
+            resource_type: isPdf ? "raw" : "auto" 
+        });
+        
+        res.json({ 
+            success: true, 
+            attachment: {
+                url: fileUpload.secure_url,
+                type: isPdf ? 'pdf' : 'image'
+            }
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: error.message });
+    }
+}
+
+// ─── Erase Chat History ───────────────────────────────────────────────────────
+const eraseChatHistory = async (req, res) => {
+    try {
+        const { appointmentId, docId } = req.body;
+        
+        // Verify doctor owns the appointment
+        const appointmentData = await appointmentModel.findById(appointmentId);
+        if (!appointmentData || appointmentData.docId !== docId) {
+            return res.json({ success: false, message: 'Unauthorized action' });
+        }
+
+        await chatModel.deleteMany({ appointmentId });
+        res.json({ success: true, message: 'Chat erased successfully' });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: error.message });
+    }
+}
+
+export { changeAvailability, doctorList, recommendDoctor, analyzeReport, loginDoctor, getDocAppointments, docCancelAppointment, docCompleteAppointment, savePrescription, getDocProfile, getDocChatHistory, uploadDocChatAttachment, eraseChatHistory }

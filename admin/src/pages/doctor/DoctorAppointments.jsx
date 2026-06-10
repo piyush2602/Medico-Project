@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { DoctorContext } from '../../context/DoctorContext'
 import PrescriptionModal from './PrescriptionModal'
+import DoctorChatModal from './DoctorChatModal'
 
 const FILTERS = ['All', 'Pending', 'Completed', 'Cancelled']
 
@@ -8,6 +9,7 @@ const DoctorAppointments = () => {
     const { dToken, appointments, getDocAppointments, cancelAppointment, completeAppointment } = useContext(DoctorContext)
     const [filter, setFilter] = useState('All')
     const [prescriptionAppt, setPrescriptionAppt] = useState(null)
+    const [chatAppt, setChatAppt] = useState(null)
 
     useEffect(() => {
         if (dToken) getDocAppointments()
@@ -148,6 +150,18 @@ const DoctorAppointments = () => {
                                         </svg>
                                     </button>
                                 )}
+                                {/* Chat button - available when not cancelled */}
+                                {!item.cancelled && (
+                                    <button
+                                        onClick={() => setChatAppt(item)}
+                                        title="Chat with Patient"
+                                        className="w-8 h-8 rounded-lg flex items-center justify-center transition-all text-sm bg-blue-100 text-blue-600 hover:bg-blue-500 hover:text-white"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                        </svg>
+                                    </button>
+                                )}
                             </div>
 
                         </div>
@@ -160,6 +174,14 @@ const DoctorAppointments = () => {
                 <PrescriptionModal
                     appointment={prescriptionAppt}
                     onClose={() => setPrescriptionAppt(null)}
+                />
+            )}
+
+            {/* Chat Modal */}
+            {chatAppt && (
+                <DoctorChatModal
+                    appointment={chatAppt}
+                    onClose={() => setChatAppt(null)}
                 />
             )}
         </div>

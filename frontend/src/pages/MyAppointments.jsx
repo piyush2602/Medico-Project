@@ -3,6 +3,7 @@ import { AppContext } from '../context/AppContext'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 import { jsPDF } from 'jspdf'
+import ChatModal from '../components/ChatModal'
 
 // ─── Shared PDF builder ────────────────────────────────────────────────────────
 const buildPrescriptionDoc = (item) => {
@@ -229,6 +230,7 @@ const MyAppointments = () => {
   const { backendUrl, token } = useContext(AppContext)
   const [appointments, setAppointments] = useState([])
   const [previewItem, setPreviewItem] = useState(null)
+  const [chatItem, setChatItem] = useState(null)
 
   const getUserAppointments = async () => {
     try {
@@ -347,6 +349,19 @@ const MyAppointments = () => {
                   </button>
                 </>
               )}
+
+              {/* Chat Button */}
+              {!item.cancelled && (
+                <button
+                  onClick={() => setChatItem(item)}
+                  className='text-sm font-medium text-center sm:min-w-48 py-2 border border-blue-400 rounded text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300 flex items-center justify-center gap-1.5'
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                  Chat with Doctor
+                </button>
+              )}
             </div>
           </div>
         ))}
@@ -357,6 +372,14 @@ const MyAppointments = () => {
         <PrescriptionPreviewModal
           item={previewItem}
           onClose={() => setPreviewItem(null)}
+        />
+      )}
+
+      {/* Chat Modal */}
+      {chatItem && (
+        <ChatModal
+          appointment={chatItem}
+          onClose={() => setChatItem(null)}
         />
       )}
     </div>

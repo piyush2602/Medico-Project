@@ -6,10 +6,11 @@ import connectCloudinary from './config/cloudinary.js'
 import adminRouter from './routes/adminRoute.js'
 import doctorRouter from './routes/doctorRoute.js'
 import userRouter from './routes/userRoute.js'
-
+import http from 'http'
+import { Server } from 'socket.io'
+import chatModel from './models/chatModel.js'
 
 // app config
-
 const app = express()
 const port = process.env.PORT || 4000
 connectDB()
@@ -24,10 +25,43 @@ app.use('/api/admin',adminRouter)
 app.use('/api/doctor',doctorRouter)
 app.use('/api/user',userRouter)
 
-
-
 app.get('/',(req,res)=>{
     res.send('API WORKING')
 })
-app.listen(port,()=>console.log("Server Started",port))
 
+const server = http.createServer(app)
+const io = new Server(server, {
+    cors: {
+        origin: '*', // allow frontend and admin apps
+        methods: ['GET', 'POST']
+    }
+})
+
+io.on('connection', (socket) => {
+    socket.on('join_room', (data) => {
+        socket.join(data.appointmentId)
+    })
+
+    socket.on('send_message', async (data) => {
+        try {
+            const newMessage = new chatModel({
+                appointmentId: data.appointmentId,
+                sender: data.sender,
+                text: data.text || '',
+                attachment: data.attachment || { url: '', type: '' },
+                timestamp: Date.now()
+            })
+            await newMessage.save()
+            // Let's emit to others, sender can optimistically render.
+            socket.to(data.appointmentId).emit('receive_message', newMessage)
+        } catch (error) {
+            console.error('Error saving message:', error)
+        }
+    })
+
+    socket.on('disconnect', () => {
+        // user disconnected
+    })
+})
+
+server.listen(port,()=>console.log("Server Started",port))

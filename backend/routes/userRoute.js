@@ -1,7 +1,8 @@
 import express from 'express'
-import { registerUser, loginUser, getProfile, updateProfile, bookAppointment, listAppointment, cancelAppointment } from '../controllers/userController.js'
+import { registerUser, loginUser, getProfile, updateProfile, bookAppointment, listAppointment, cancelAppointment, getChatHistory, uploadChatAttachment } from '../controllers/userController.js'
 import authUser from '../middlewares/authUser.js'
 import upload from '../middlewares/multer.js'
+import uploadChat from '../middlewares/multerChat.js'
 
 const userRouter = express.Router()
 
@@ -13,5 +14,9 @@ userRouter.post("/update-profile", upload.single('image'), authUser, updateProfi
 userRouter.post("/book-appointment", authUser, bookAppointment)
 userRouter.get("/appointments", authUser, listAppointment)
 userRouter.post("/cancel-appointment", authUser, cancelAppointment)
+
+// Chat routes
+userRouter.get("/chat-history/:appointmentId", authUser, getChatHistory)
+userRouter.post("/chat-attachment", authUser, uploadChat.single('attachment'), uploadChatAttachment)
 
 export default userRouter

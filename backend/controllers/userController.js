@@ -5,6 +5,7 @@ import jwt from 'jsonwebtoken'
 import {v2 as cloudinary} from 'cloudinary'
 import appointmentModel from '../models/appointmentModel.js'
 import doctorModel from '../models/doctorModel.js'
+import chatModel from '../models/chatModel.js'
 
 // api to register user
 const registerUser = async (req, res) => {
@@ -219,4 +220,43 @@ const cancelAppointment = async (req, res) => {
     }
 }
 
-export { registerUser, loginUser, getProfile, updateProfile, bookAppointment, listAppointment, cancelAppointment }
+// api to get chat history for an appointment
+const getChatHistory = async (req, res) => {
+    try {
+        const { appointmentId } = req.params;
+        const messages = await chatModel.find({ appointmentId }).sort({ timestamp: 1 });
+        res.json({ success: true, messages });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: error.message });
+    }
+}
+
+// api to upload chat attachment
+const uploadChatAttachment = async (req, res) => {
+    try {
+        const imageFile = req.file;
+        if (!imageFile) {
+            return res.json({ success: false, message: "No file provided" });
+        }
+        
+        const isPdf = imageFile.mimetype === 'application/pdf';
+        const fileUpload = await cloudinary.uploader.upload(imageFile.path, { 
+            resource_type: isPdf ? "raw" : "auto" 
+        });
+        
+        res.json({ 
+            success: true, 
+            attachment: {
+                url: fileUpload.secure_url,
+                type: isPdf ? 'pdf' : 'image'
+            }
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: error.message });
+    }
+}
+
+export { registerUser, loginUser, getProfile, updateProfile, bookAppointment, listAppointment, cancelAppointment, getChatHistory, uploadChatAttachment }

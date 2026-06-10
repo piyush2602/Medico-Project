@@ -122,15 +122,13 @@ export const sendReminderEmail = async (patientEmail, patientName, doctorName, d
 };
 
 export const sendSignInEmail = async (email, name, deviceName) => {
-    const subject = "New Sign-In Alert - Medico";
+    const subject = "Welcome back to Medico!";
     const html = `
         <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
-            <h2 style="color: #5F6FFF;">Thank you for signing in, ${name}!</h2>
-            <p>We noticed a recent sign-in to your Medico account.</p>
-            <p><strong>Device Info:</strong> ${deviceName || 'Unknown Device'}</p>
+            <h2 style="color: #5F6FFF;">Welcome back, ${name}!</h2>
+            <p>You have successfully logged into your Medico account.</p>
             <br>
-            <p>If this was you, you can safely ignore this email.</p>
-            <p>If you don't recognize this activity, please contact support immediately.</p>
+            <p>If you need to book an appointment or manage your profile, you can do so directly from your dashboard.</p>
             <br>
             <p>Stay healthy!</p>
             <p><strong>The Medico Team</strong></p>

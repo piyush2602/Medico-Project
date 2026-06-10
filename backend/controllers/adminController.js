@@ -5,6 +5,7 @@ import doctorModel from "../models/doctorModel.js"
 import jwt from 'jsonwebtoken'
 import appointmentModel from "../models/appointmentModel.js"
 import userModel from "../models/userModel.js"
+import { sendAppointmentCancellation } from "../config/notifier.js"
 
 
 //  API for adding doctor 
@@ -133,6 +134,9 @@ const appointmentCancel = async (req, res) => {
         
         await doctorModel.findByIdAndUpdate(docId, { slots_booked })
         
+        const userData = await userModel.findById(appointmentData.userId)
+        sendAppointmentCancellation(userData.email, doctorData.email, userData.name, doctorData.name, slotDate, slotTime, 'Admin');
+
         res.json({ success: true, message: 'Appointment cancelled' })
     } catch (error) {
         console.log(error)

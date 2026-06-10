@@ -9,10 +9,15 @@ import userRouter from './routes/userRoute.js'
 import http from 'http'
 import { Server } from 'socket.io'
 import chatModel from './models/chatModel.js'
+import { startDailyReminderCron } from './jobs/reminderCron.js'
 
 // app config
 const app = express()
 const port = process.env.PORT || 4000
+const server = http.createServer(app)
+
+// Start cron jobs
+startDailyReminderCron()
 connectDB()
 connectCloudinary()
 
@@ -29,7 +34,6 @@ app.get('/',(req,res)=>{
     res.send('API WORKING')
 })
 
-const server = http.createServer(app)
 const io = new Server(server, {
     cors: {
         origin: '*', // allow frontend and admin apps

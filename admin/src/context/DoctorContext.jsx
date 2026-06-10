@@ -140,6 +140,27 @@ const DoctorContextProvider = (props) => {
         }
     }
 
+    // ── Send Custom Email to Patient ───────────────────────────────────────────
+    const sendEmailToPatient = async (appointmentId, subject, message) => {
+        try {
+            const { data } = await axios.post(
+                backendUrl + '/api/doctor/send-email',
+                { appointmentId, subject, message },
+                { headers: { dtoken: dToken } }
+            )
+            if (data.success) {
+                toast.success('Email sent to patient!')
+                return true
+            } else {
+                toast.error(data.message)
+                return false
+            }
+        } catch (error) {
+            toast.error(error.message)
+            return false
+        }
+    }
+
     const value = {
         dToken, setDToken,
         backendUrl,
@@ -150,7 +171,8 @@ const DoctorContextProvider = (props) => {
         getDocAppointments,
         cancelAppointment, completeAppointment,
         savePrescription,
-        getDocProfile
+        getDocProfile,
+        sendEmailToPatient
     }
 
     return (

@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import { DoctorContext } from '../../context/DoctorContext'
 import PrescriptionModal from './PrescriptionModal'
 import DoctorChatModal from './DoctorChatModal'
+import DoctorEmailModal from './DoctorEmailModal'
 
 const FILTERS = ['All', 'Pending', 'Completed', 'Cancelled']
 
@@ -10,6 +11,7 @@ const DoctorAppointments = () => {
     const [filter, setFilter] = useState('All')
     const [prescriptionAppt, setPrescriptionAppt] = useState(null)
     const [chatAppt, setChatAppt] = useState(null)
+    const [emailAppt, setEmailAppt] = useState(null)
 
     useEffect(() => {
         if (dToken) getDocAppointments()
@@ -70,7 +72,7 @@ const DoctorAppointments = () => {
             {/* Table */}
             <div className='bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden'>
                 {/* Table Header */}
-                <div className='grid grid-cols-[auto_2fr_1.5fr_1fr_1fr_auto] gap-3 items-center px-6 py-3 bg-gray-50/80 border-b border-gray-100 text-xs font-semibold text-gray-400 uppercase tracking-wide'>
+                <div className='grid grid-cols-[40px_3fr_2fr_1fr_1.5fr_190px] gap-4 items-center px-6 py-3 bg-gray-50/80 border-b border-gray-100 text-xs font-semibold text-gray-400 uppercase tracking-wide'>
                     <span>#</span>
                     <span>Patient</span>
                     <span>Date & Time</span>
@@ -87,7 +89,7 @@ const DoctorAppointments = () => {
                         </div>
                     )}
                     {filtered.map((item, idx) => (
-                        <div key={item._id} className='grid grid-cols-[auto_2fr_1.5fr_1fr_1fr_auto] gap-3 items-center px-6 py-4 hover:bg-blue-50/30 transition-colors'>
+                        <div key={item._id} className='grid grid-cols-[40px_3fr_2fr_1fr_1.5fr_190px] gap-4 items-center px-6 py-4 hover:bg-blue-50/30 transition-colors'>
 
                             {/* # */}
                             <span className='text-xs text-gray-400 font-mono w-6'>{idx + 1}</span>
@@ -162,6 +164,18 @@ const DoctorAppointments = () => {
                                         </svg>
                                     </button>
                                 )}
+                                {/* Email button - available when not cancelled */}
+                                {!item.cancelled && (
+                                    <button
+                                        onClick={() => setEmailAppt(item)}
+                                        title="Send Email to Patient"
+                                        className="w-8 h-8 rounded-lg flex items-center justify-center transition-all text-sm bg-purple-100 text-purple-600 hover:bg-purple-500 hover:text-white"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                        </svg>
+                                    </button>
+                                )}
                             </div>
 
                         </div>
@@ -182,6 +196,14 @@ const DoctorAppointments = () => {
                 <DoctorChatModal
                     appointment={chatAppt}
                     onClose={() => setChatAppt(null)}
+                />
+            )}
+
+            {/* Email Modal */}
+            {emailAppt && (
+                <DoctorEmailModal
+                    appointment={emailAppt}
+                    onClose={() => setEmailAppt(null)}
                 />
             )}
         </div>

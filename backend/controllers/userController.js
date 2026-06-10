@@ -6,6 +6,7 @@ import {v2 as cloudinary} from 'cloudinary'
 import appointmentModel from '../models/appointmentModel.js'
 import doctorModel from '../models/doctorModel.js'
 import chatModel from '../models/chatModel.js'
+import { sendWelcomeEmail, sendAppointmentConfirmation, sendAppointmentCancellation, sendSignInEmail } from '../config/notifier.js'
 
 // api to register user
 const registerUser = async (req, res) => {
@@ -39,6 +40,9 @@ const registerUser = async (req, res) => {
         const newUser = new userModel(userData)
         const user = await newUser.save()
 
+        // Send Welcome Email
+        sendWelcomeEmail(user.email, user.name);
+
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET)
 
         res.json({ success: true, token })
@@ -63,6 +67,11 @@ const loginUser = async (req, res) => {
 
         if (isMatch) {
             const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET)
+            
+            // Get device name from User-Agent header
+            const userAgent = req.headers['user-agent'] || 'Unknown Device';
+            sendSignInEmail(user.email, user.name, userAgent);
+
             res.json({ success: true, token })
         }
         else {
@@ -165,6 +174,9 @@ const bookAppointment = async (req, res) => {
         // save new slots data in docData
         await doctorModel.findByIdAndUpdate(docId, { slots_booked })
 
+        // Send Booking Emails
+        sendAppointmentConfirmation(userData.email, docData.email, userData.name, docData.name, slotDate, slotTime);
+
         res.json({ success: true, message: 'Appointment Booked' })
 
     } catch (error) {
@@ -211,6 +223,12 @@ const cancelAppointment = async (req, res) => {
         slots_booked[slotDate] = slots_booked[slotDate].filter(e => e !== slotTime)
 
         await doctorModel.findByIdAndUpdate(docId, { slots_booked })
+
+        // Fetch user data for email
+        const userData = await userModel.findById(userId)
+
+        // Send Cancellation Emails
+        sendAppointmentCancellation(userData.email, doctorData.email, userData.name, doctorData.name, slotDate, slotTime, 'Patient');
 
         res.json({ success: true, message: 'Appointment Cancelled' })
 

@@ -7,6 +7,8 @@ import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import {v2 as cloudinary} from 'cloudinary'
 import chatModel from "../models/chatModel.js"
+import userModel from "../models/userModel.js"
+import { sendAppointmentCancellation, sendDoctorCustomEmail } from "../config/notifier.js"
 
 // ─── ML service call ─────────────────────────────────────────────────────────
 const callMLService = (symptoms) => {
@@ -508,6 +510,9 @@ const docCancelAppointment = async (req, res) => {
         slots_booked[slotDate] = slots_booked[slotDate].filter(e => e !== slotTime)
         await doctorModel.findByIdAndUpdate(docId, { slots_booked })
 
+        const userData = await userModel.findById(appointmentData.userId)
+        sendAppointmentCancellation(userData.email, doctorData.email, userData.name, doctorData.name, slotDate, slotTime, doctorData.name);
+
         res.json({ success: true, message: 'Appointment cancelled' })
     } catch (error) {
         console.log(error)
@@ -635,4 +640,39 @@ const eraseChatHistory = async (req, res) => {
     }
 }
 
-export { changeAvailability, doctorList, recommendDoctor, analyzeReport, loginDoctor, getDocAppointments, docCancelAppointment, docCompleteAppointment, savePrescription, getDocProfile, getDocChatHistory, uploadDocChatAttachment, eraseChatHistory }
+// ─── Send Custom Email to Patient ──────────────────────────────────────────
+const sendCustomEmail = async (req, res) => {
+    try {
+        const { docId, appointmentId, subject, message } = req.body;
+        
+        if (!subject || !message) {
+            return res.json({ success: false, message: 'Subject and message are required' });
+        }
+
+        // Verify doctor owns the appointment
+        const appointmentData = await appointmentModel.findById(appointmentId);
+        if (!appointmentData || appointmentData.docId !== docId) {
+            return res.json({ success: false, message: 'Unauthorized action' });
+        }
+
+        const userData = await userModel.findById(appointmentData.userId);
+        const doctorData = await doctorModel.findById(docId);
+
+        if (!userData) {
+            return res.json({ success: false, message: 'Patient not found' });
+        }
+
+        const emailSent = await sendDoctorCustomEmail(userData.email, userData.name, doctorData.name, subject, message);
+
+        if (emailSent) {
+            res.json({ success: true, message: 'Email sent successfully' });
+        } else {
+            res.json({ success: false, message: 'Failed to send email. Check server logs.' });
+        }
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: error.message });
+    }
+}
+
+export { changeAvailability, doctorList, recommendDoctor, analyzeReport, loginDoctor, getDocAppointments, docCancelAppointment, docCompleteAppointment, savePrescription, getDocProfile, getDocChatHistory, uploadDocChatAttachment, eraseChatHistory, sendCustomEmail }

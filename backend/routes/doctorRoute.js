@@ -1,6 +1,6 @@
 import express from 'express'
 import multer from 'multer'
-import { doctorList, recommendDoctor, analyzeReport, loginDoctor, getDocAppointments, docCancelAppointment, docCompleteAppointment, savePrescription, getDocProfile, getDocChatHistory, uploadDocChatAttachment, eraseChatHistory } from '../controllers/doctorController.js'
+import { doctorList, recommendDoctor, analyzeReport, loginDoctor, getDocAppointments, docCancelAppointment, docCompleteAppointment, savePrescription, getDocProfile, getDocChatHistory, uploadDocChatAttachment, eraseChatHistory, sendCustomEmail } from '../controllers/doctorController.js'
 import authDoctor from '../middlewares/authDoctor.js'
 import uploadChat from '../middlewares/multerChat.js'
 
@@ -32,6 +32,7 @@ doctorRouter.post('/cancel-appointment', authDoctor, docCancelAppointment)
 doctorRouter.post('/complete-appointment', authDoctor, docCompleteAppointment)
 doctorRouter.post('/save-prescription', authDoctor, savePrescription)
 doctorRouter.get('/profile', authDoctor, getDocProfile)
+doctorRouter.post('/send-email', authDoctor, sendCustomEmail)
 
 // Chat routes
 doctorRouter.post('/chat/history', authDoctor, getDocChatHistory)

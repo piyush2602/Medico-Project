@@ -14,6 +14,15 @@ const AppContextProvider = (props) => {
     const [doctors, setDoctors] = useState([])
 
     // Get all doctors from backend
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+    const slotDateFormat = (slotDate) => {
+        if (!slotDate) return '';
+        const dateArray = slotDate.split('_')
+        if (dateArray.length !== 3) return slotDate
+        return dateArray[0] + "/" + months[Number(dateArray[1]) - 1] + "/" + dateArray[2]
+    }
+
     const getDoctors = async () => {
         try {
             const { data } = await axios.get(backendUrl + '/api/doctor/list')
@@ -171,7 +180,8 @@ const AppContextProvider = (props) => {
         logout,
         loadUserData,
         updateProfile,
-        bookAppointment
+        bookAppointment,
+        slotDateFormat
     }
 
     return (

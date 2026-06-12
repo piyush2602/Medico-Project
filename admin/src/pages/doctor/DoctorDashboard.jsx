@@ -1,5 +1,6 @@
 import React, { useContext, useEffect } from 'react'
 import { DoctorContext } from '../../context/DoctorContext'
+import { AppContext } from '../../context/AppContext'
 
 const StatCard = ({ icon, label, value, color, bg }) => (
     <div className={`flex items-center gap-4 p-5 rounded-2xl ${bg} border border-white/60 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 cursor-default min-w-[200px] flex-1`}>
@@ -21,6 +22,7 @@ const statusBadge = (item) => {
 
 const DoctorDashboard = () => {
     const { dToken, dashData, getDocAppointments, getDocProfile, docProfile, cancelAppointment, completeAppointment } = useContext(DoctorContext)
+    const { slotDateFormat } = useContext(AppContext)
 
     useEffect(() => {
         if (dToken) {
@@ -92,7 +94,7 @@ const DoctorDashboard = () => {
                             />
                             <div className='flex-1 min-w-0'>
                                 <p className='font-semibold text-gray-800 text-sm truncate'>{item.userData?.name}</p>
-                                <p className='text-xs text-gray-400'>{item.slotDate} | {item.slotTime}</p>
+                                <p className='text-xs text-gray-400'>{slotDateFormat(item.slotDate)} | {item.slotTime}</p>
                             </div>
                             <div className='flex items-center gap-2'>
                                 {statusBadge(item)}

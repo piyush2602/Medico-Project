@@ -775,7 +775,21 @@ const getDocAppointments = async (req, res) => {
   try {
     const { docId } = req.body;
     const appointments = await appointmentModel.find({ docId });
-    res.json({ success: true, appointments: appointments.reverse() });
+
+    const appointmentsWithUnreadCount = await Promise.all(
+      appointments.map(async (appt) => {
+        const unreadCount = await chatModel.countDocuments({
+          appointmentId: appt._id.toString(),
+          sender: "patient",
+          isRead: false,
+        });
+        const apptObj = appt.toObject();
+        apptObj.unreadCount = unreadCount;
+        return apptObj;
+      })
+    );
+
+    res.json({ success: true, appointments: appointmentsWithUnreadCount.reverse() });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });
@@ -890,6 +904,13 @@ const getDocChatHistory = async (req, res) => {
     if (!appointmentData || appointmentData.docId !== docId) {
       return res.json({ success: false, message: "Unauthorized action" });
     }
+
+    // Mark messages from patient as read
+    await chatModel.updateMany(
+      { appointmentId, sender: "patient", isRead: false },
+      { $set: { isRead: true } }
+    );
+
     const messages = await chatModel
       .find({ appointmentId })
       .sort({ timestamp: 1 });

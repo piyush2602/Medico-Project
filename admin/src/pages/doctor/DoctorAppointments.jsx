@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { DoctorContext } from '../../context/DoctorContext'
+import { AppContext } from '../../context/AppContext'
 import PrescriptionModal from './PrescriptionModal'
 import DoctorChatModal from './DoctorChatModal'
 import DoctorEmailModal from './DoctorEmailModal'
@@ -7,7 +8,8 @@ import DoctorEmailModal from './DoctorEmailModal'
 const FILTERS = ['All', 'Pending', 'Completed', 'Cancelled']
 
 const DoctorAppointments = () => {
-    const { dToken, appointments, getDocAppointments, cancelAppointment, completeAppointment } = useContext(DoctorContext)
+    const { dToken, appointments, setAppointments, getDocAppointments, cancelAppointment, completeAppointment } = useContext(DoctorContext)
+    const { slotDateFormat } = useContext(AppContext)
     const [filter, setFilter] = useState('All')
     const [prescriptionAppt, setPrescriptionAppt] = useState(null)
     const [chatAppt, setChatAppt] = useState(null)
@@ -109,7 +111,7 @@ const DoctorAppointments = () => {
 
                             {/* Date & Time */}
                             <div>
-                                <p className='text-sm text-gray-700 font-medium'>{item.slotDate}</p>
+                                <p className='text-sm text-gray-700 font-medium'>{slotDateFormat(item.slotDate)}</p>
                                 <p className='text-xs text-gray-400'>{item.slotTime}</p>
                             </div>
 
@@ -155,13 +157,23 @@ const DoctorAppointments = () => {
                                 {/* Chat button - available when not cancelled */}
                                 {!item.cancelled && (
                                     <button
-                                        onClick={() => setChatAppt(item)}
+                                        onClick={() => {
+                                            setChatAppt(item);
+                                            if (item.unreadCount > 0) {
+                                                setAppointments(prev => prev.map(a => a._id === item._id ? { ...a, unreadCount: 0 } : a));
+                                            }
+                                        }}
                                         title="Chat with Patient"
-                                        className="w-8 h-8 rounded-lg flex items-center justify-center transition-all text-sm bg-blue-100 text-blue-600 hover:bg-blue-500 hover:text-white"
+                                        className="relative w-8 h-8 rounded-lg flex items-center justify-center transition-all text-sm bg-blue-100 text-blue-600 hover:bg-blue-500 hover:text-white"
                                     >
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                                         </svg>
+                                        {item.unreadCount > 0 && (
+                                            <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[9px] font-bold w-4 h-4 flex items-center justify-center rounded-full border border-white">
+                                                {item.unreadCount}
+                                            </span>
+                                        )}
                                     </button>
                                 )}
                                 {/* Email button - available when not cancelled */}

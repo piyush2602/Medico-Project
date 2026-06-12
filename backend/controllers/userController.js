@@ -191,7 +191,18 @@ const listAppointment = async (req, res) => {
         const { userId } = req.body
         const appointments = await appointmentModel.find({ userId })
 
-        res.json({ success: true, appointments })
+        const appointmentsWithUnreadCount = await Promise.all(appointments.map(async (appt) => {
+            const unreadCount = await chatModel.countDocuments({
+                appointmentId: appt._id.toString(),
+                sender: 'doctor',
+                isRead: false
+            });
+            const apptObj = appt.toObject();
+            apptObj.unreadCount = unreadCount;
+            return apptObj;
+        }));
+
+        res.json({ success: true, appointments: appointmentsWithUnreadCount })
 
     } catch (error) {
         console.log(error)
@@ -242,6 +253,13 @@ const cancelAppointment = async (req, res) => {
 const getChatHistory = async (req, res) => {
     try {
         const { appointmentId } = req.params;
+        
+        // Mark messages from doctor as read
+        await chatModel.updateMany(
+            { appointmentId, sender: 'doctor', isRead: false },
+            { $set: { isRead: true } }
+        );
+
         const messages = await chatModel.find({ appointmentId }).sort({ timestamp: 1 });
         res.json({ success: true, messages });
     } catch (error) {

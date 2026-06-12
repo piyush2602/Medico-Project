@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react'
 import { DoctorContext } from '../../context/DoctorContext'
+import { AppContext } from '../../context/AppContext'
 import { jsPDF } from 'jspdf'
 
 const PrescriptionModal = ({ appointment, onClose }) => {
     const { savePrescription, docProfile } = useContext(DoctorContext)
+    const { slotDateFormat } = useContext(AppContext)
 
     const existingRx = appointment?.prescription || null
     const [medicines, setMedicines] = useState(
@@ -95,7 +97,7 @@ const PrescriptionModal = ({ appointment, onClose }) => {
         doc.setFontSize(9)
         const pat = appointment.userData
         doc.text(`Name: ${pat?.name || 'N/A'}`, 18, y + 16)
-        doc.text(`Date: ${appointment.slotDate} | Time: ${appointment.slotTime}`, 18, y + 23)
+        doc.text(`Date: ${slotDateFormat(appointment.slotDate)} | Time: ${appointment.slotTime}`, 18, y + 23)
         doc.text(`Phone: ${pat?.phone || 'N/A'}`, W / 2 + 10, y + 16)
         doc.text(`Gender: ${pat?.gender || 'N/A'}`, W / 2 + 10, y + 23)
         if (hasWeight) {
@@ -247,7 +249,7 @@ const PrescriptionModal = ({ appointment, onClose }) => {
                         <h2 className='text-xl font-bold text-gray-800'>Write Prescription</h2>
                         <p className='text-sm text-gray-500 mt-0.5'>
                             Patient: <span className='font-semibold text-gray-700'>{appointment?.userData?.name}</span>
-                            &nbsp;•&nbsp; {appointment?.slotDate} at {appointment?.slotTime}
+                            &nbsp;•&nbsp; {slotDateFormat(appointment?.slotDate)} at {appointment?.slotTime}
                         </p>
                     </div>
                     <button

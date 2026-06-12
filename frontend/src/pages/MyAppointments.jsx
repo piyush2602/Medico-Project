@@ -6,7 +6,7 @@ import { jsPDF } from 'jspdf'
 import ChatModal from '../components/ChatModal'
 
 // ─── Shared PDF builder ────────────────────────────────────────────────────────
-const buildPrescriptionDoc = (item) => {
+const buildPrescriptionDoc = (item, slotDateFormat) => {
   const rx = item.prescription
   const doc = new jsPDF({ unit: 'mm', format: 'a4' })
   const W = doc.internal.pageSize.getWidth()
@@ -43,7 +43,7 @@ const buildPrescriptionDoc = (item) => {
   doc.setFont('helvetica', 'normal').setFontSize(9)
   const pat = item.userData
   doc.text(`Name: ${pat?.name || 'N/A'}`, 18, y + 16)
-  doc.text(`Date: ${item.slotDate} | Time: ${item.slotTime}`, 18, y + 23)
+  doc.text(`Date: ${slotDateFormat ? slotDateFormat(item.slotDate) : item.slotDate} | Time: ${item.slotTime}`, 18, y + 23)
   doc.text(`Phone: ${pat?.phone || 'N/A'}`, W / 2 + 10, y + 16)
   doc.text(`Gender: ${pat?.gender || 'N/A'}`, W / 2 + 10, y + 23)
   if (hasWeight) doc.text(`Weight: ${rx.patientWeight} kg`, 18, y + 30)
@@ -143,13 +143,13 @@ const buildPrescriptionDoc = (item) => {
 }
 
 // ─── Prescription Preview Modal ────────────────────────────────────────────────
-const PrescriptionPreviewModal = ({ item, onClose }) => {
+const PrescriptionPreviewModal = ({ item, onClose, slotDateFormat }) => {
   const [pdfUrl, setPdfUrl] = useState(null)
 
   useEffect(() => {
     document.body.style.overflow = 'hidden'
     // Build PDF and get blob URL for the iframe
-    const doc = buildPrescriptionDoc(item)
+    const doc = buildPrescriptionDoc(item, slotDateFormat)
     const url = doc.output('bloburl')
     setPdfUrl(url)
     return () => {
@@ -160,7 +160,7 @@ const PrescriptionPreviewModal = ({ item, onClose }) => {
   }, [item])
 
   const handleDownload = () => {
-    const doc = buildPrescriptionDoc(item)
+    const doc = buildPrescriptionDoc(item, slotDateFormat)
     const fileName = `Prescription_${item.docData?.name || 'Doctor'}_${item.slotDate}.pdf`
     doc.save(fileName.replace(/\s+/g, '_'))
   }
@@ -175,7 +175,7 @@ const PrescriptionPreviewModal = ({ item, onClose }) => {
           <div>
             <p className='font-semibold text-sm'>Prescription Preview</p>
             <p className='text-xs text-gray-400'>
-              {item.docData?.name} • {item.slotDate} at {item.slotTime}
+              {item.docData?.name} • {slotDateFormat ? slotDateFormat(item.slotDate) : item.slotDate} at {item.slotTime}
             </p>
           </div>
         </div>
@@ -227,7 +227,7 @@ const PrescriptionPreviewModal = ({ item, onClose }) => {
 
 // ─── Main Component ────────────────────────────────────────────────────────────
 const MyAppointments = () => {
-  const { backendUrl, token } = useContext(AppContext)
+  const { backendUrl, token, slotDateFormat } = useContext(AppContext)
   const [appointments, setAppointments] = useState([])
   const [previewItem, setPreviewItem] = useState(null)
   const [chatItem, setChatItem] = useState(null)
@@ -260,7 +260,7 @@ const MyAppointments = () => {
   }
 
   const downloadPrescription = useCallback((item) => {
-    const doc = buildPrescriptionDoc(item)
+    const doc = buildPrescriptionDoc(item, slotDateFormat)
     const fileName = `Prescription_${item.docData?.name || 'Doctor'}_${item.slotDate}.pdf`
     doc.save(fileName.replace(/\s+/g, '_'))
   }, [])
@@ -286,7 +286,7 @@ const MyAppointments = () => {
               <p className='text-xs'>{item.docData.address.line2}</p>
               <p className='text-xs mt-1'>
                 <span className='text-sm text-neutral-700 font-medium'>Date &amp; Time:</span>{' '}
-                {item.slotDate} | {item.slotTime}
+                {slotDateFormat(item.slotDate)} | {item.slotTime}
               </p>
               {/* Prescription indicator */}
               {item.prescription && (
@@ -353,13 +353,23 @@ const MyAppointments = () => {
               {/* Chat Button */}
               {!item.cancelled && (
                 <button
-                  onClick={() => setChatItem(item)}
-                  className='text-sm font-medium text-center sm:min-w-48 py-2 border border-blue-400 rounded text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300 flex items-center justify-center gap-1.5'
+                  onClick={() => {
+                      setChatItem(item);
+                      if (item.unreadCount > 0) {
+                          setAppointments(prev => prev.map(a => a._id === item._id ? { ...a, unreadCount: 0 } : a));
+                      }
+                  }}
+                  className='relative text-sm font-medium text-center sm:min-w-48 py-2 border border-blue-400 rounded text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300 flex items-center justify-center gap-1.5'
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                   </svg>
                   Chat with Doctor
+                  {item.unreadCount > 0 && (
+                      <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full border border-white">
+                          {item.unreadCount}
+                      </span>
+                  )}
                 </button>
               )}
             </div>
@@ -372,6 +382,7 @@ const MyAppointments = () => {
         <PrescriptionPreviewModal
           item={previewItem}
           onClose={() => setPreviewItem(null)}
+          slotDateFormat={slotDateFormat}
         />
       )}
 

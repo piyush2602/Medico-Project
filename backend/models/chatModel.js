@@ -8,6 +8,7 @@ const chatSchema = new mongoose.Schema({
         url: { type: String, default: '' },
         type: { type: String, default: '' } // 'image' or 'pdf'
     },
+    isRead: { type: Boolean, default: false },
     timestamp: { type: Number, required: true }
 })
 

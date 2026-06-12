@@ -1,10 +1,12 @@
 import React, { useContext, useEffect } from 'react'
 import { AdminContext } from '../context/AdminContext'
+import { AppContext } from '../context/AppContext'
 import { assets } from '../assets/assets'
 
 const AllAppointments = () => {
 
     const { aToken, appointments, getAllAppointments, cancelAppointment, completeAppointment } = useContext(AdminContext)
+    const { slotDateFormat } = useContext(AppContext)
 
     useEffect(() => {
         if (aToken) {
@@ -34,7 +36,7 @@ const AllAppointments = () => {
                             <img src={item.userData.image} className='w-8 rounded-full' alt="" /> <p>{item.userData.name}</p>
                         </div>
                         <p className='max-sm:hidden'>{item.userData.age || 'N/A'}</p>
-                        <p>{item.slotDate}, {item.slotTime}</p>
+                        <p>{slotDateFormat(item.slotDate)}, {item.slotTime}</p>
                         <div className='flex items-center gap-2'>
                             <img src={item.docData.image} className='w-8 rounded-full bg-gray-200' alt="" /> <p>{item.docData.name}</p>
                         </div>

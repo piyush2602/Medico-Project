@@ -7,7 +7,7 @@ import DoctorEmailModal from './DoctorEmailModal'
 
 const FILTERS = ['All', 'Pending', 'Completed', 'Cancelled']
 
-const DoctorAppointments = () => {
+const DoctorAppointments = ({ isToday = false }) => {
     const { dToken, appointments, setAppointments, getDocAppointments, cancelAppointment, completeAppointment } = useContext(DoctorContext)
     const { slotDateFormat } = useContext(AppContext)
     const [filter, setFilter] = useState('All')
@@ -19,7 +19,11 @@ const DoctorAppointments = () => {
         if (dToken) getDocAppointments()
     }, [dToken])
 
-    const filtered = appointments.filter(a => {
+    const today = new Date()
+    const todaySlotDate = `${today.getDate()}_${today.getMonth() + 1}_${today.getFullYear()}`
+    const baseAppointments = isToday ? appointments.filter(a => a.slotDate === todaySlotDate) : appointments;
+
+    const filtered = baseAppointments.filter(a => {
         if (filter === 'Pending') return !a.cancelled && !a.isCompleted
         if (filter === 'Completed') return a.isCompleted
         if (filter === 'Cancelled') return a.cancelled
@@ -48,7 +52,7 @@ const DoctorAppointments = () => {
         <div className='p-6'>
             {/* Page title */}
             <div className='mb-5'>
-                <h2 className='text-2xl font-bold text-gray-800'>My Appointments</h2>
+                <h2 className='text-2xl font-bold text-gray-800'>{isToday ? "Today's Appointments" : "My Appointments"}</h2>
                 <p className='text-sm text-gray-400 mt-1'>Manage your appointments, mark them complete, or write prescriptions.</p>
             </div>
 
@@ -63,7 +67,7 @@ const DoctorAppointments = () => {
                                 ? 'bg-primary text-white shadow-md shadow-primary/30'
                                 : 'bg-white text-gray-500 border border-gray-200 hover:border-primary hover:text-primary'
                         }`}
-                    >{f} {f === 'All' ? `(${appointments.length})` : `(${appointments.filter(a => {
+                    >{f} {f === 'All' ? `(${baseAppointments.length})` : `(${baseAppointments.filter(a => {
                         if (f === 'Pending') return !a.cancelled && !a.isCompleted
                         if (f === 'Completed') return a.isCompleted
                         return a.cancelled

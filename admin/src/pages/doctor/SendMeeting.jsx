@@ -14,6 +14,9 @@ const SendMeeting = () => {
     const [additionalMessage, setAdditionalMessage] = useState('')
     const [isSending, setIsSending] = useState(false)
 
+    const today = new Date()
+    const todaySlotDate = `${today.getDate()}_${today.getMonth() + 1}_${today.getFullYear()}`
+
     useEffect(() => {
         if (dToken) {
             getDocAppointments()
@@ -89,8 +92,12 @@ const SendMeeting = () => {
                                 const appt = appointments.find(a => a._id === e.target.value)
                                 if (appt) {
                                     setMeetingTime(`${slotDateFormat(appt.slotDate)} at ${appt.slotTime}`)
+                                    setMeetingLink(appt.meetingData?.link || '')
+                                    setMeetingId(appt.meetingData?.id || '')
                                 } else {
                                     setMeetingTime('')
+                                    setMeetingLink('')
+                                    setMeetingId('')
                                 }
                             }}
                             required
@@ -166,6 +173,68 @@ const SendMeeting = () => {
                         ) : 'Send Meeting Details via Email'}
                     </button>
                 </form>
+            </div>
+
+            {/* Today's Appointments */}
+            <div className='mt-10'>
+                <h3 className='text-xl font-bold text-gray-800 mb-4'>Today's Appointments</h3>
+                <div className='bg-white border rounded shadow-sm text-sm overflow-hidden'>
+                    <div className='hidden sm:grid grid-cols-[0.5fr_2fr_2fr_2fr_1.5fr_1fr_1fr] grid-flow-col py-3 px-6 border-b bg-gray-50 text-gray-600 font-semibold'>
+                        <p>#</p>
+                        <p>Patient</p>
+                        <p>Meeting Time</p>
+                        <p>Meeting Link</p>
+                        <p>Meeting ID</p>
+                        <p>Status</p>
+                        <p>Actions</p>
+                    </div>
+                    {appointments.filter(a => a.slotDate === todaySlotDate).length === 0 ? (
+                        <p className='p-6 text-center text-gray-500'>No appointments today.</p>
+                    ) : (
+                        appointments.filter(a => a.slotDate === todaySlotDate).map((item, index) => (
+                            <div className='flex flex-wrap justify-between max-sm:gap-2 sm:grid sm:grid-cols-[0.5fr_2fr_2fr_2fr_1.5fr_1fr_1fr] items-center text-gray-600 py-4 px-6 border-b hover:bg-gray-50' key={item._id}>
+                                <p className='max-sm:hidden'>{index + 1}</p>
+                                <div className='flex items-center gap-2'>
+                                    <img src={item.userData.image} className='w-8 rounded-full' alt="" /> <p className='font-medium text-gray-800'>{item.userData.name}</p>
+                                </div>
+                                <p>{item.meetingData?.time || (slotDateFormat(item.slotDate) + ' at ' + item.slotTime)}</p>
+                                {item.meetingData?.link ? (
+                                    <a href={item.meetingData.link} target='_blank' rel='noopener noreferrer' className='text-blue-500 hover:underline truncate max-w-[200px]'>
+                                        {item.meetingData.link}
+                                    </a>
+                                ) : (
+                                    <p className='text-gray-400'>Not sent</p>
+                                )}
+                                <p className='truncate text-sm'>{item.meetingData?.id || '-'}</p>
+                                <div>
+                                    {
+                                        item.cancelled 
+                                            ? <span className='px-2 py-1 rounded-full text-[10px] font-semibold bg-red-100 text-red-600'>Cancelled</span>
+                                            : item.isCompleted 
+                                                ? <span className='px-2 py-1 rounded-full text-[10px] font-semibold bg-green-100 text-green-600'>Completed</span>
+                                                : <span className='px-2 py-1 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-600'>Pending</span>
+                                    }
+                                </div>
+                                <div>
+                                    {!item.cancelled && !item.isCompleted && (
+                                        <div className='flex items-center gap-2'>
+                                            <button 
+                                                onClick={() => completeAppointment(item._id)} 
+                                                title='Mark as Completed'
+                                                className='w-8 h-8 rounded-lg bg-green-50 text-green-600 hover:bg-green-600 hover:text-white flex items-center justify-center transition-all'
+                                            >✓</button>
+                                            <button 
+                                                onClick={() => cancelAppointment(item._id)} 
+                                                title='Cancel Appointment'
+                                                className='w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all'
+                                            >✕</button>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
             </div>
 
             {/* Sent Meetings Record */}

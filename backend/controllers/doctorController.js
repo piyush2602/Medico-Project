@@ -977,7 +977,7 @@ const eraseChatHistory = async (req, res) => {
 // ─── Send Custom Email to Patient ──────────────────────────────────────────
 const sendCustomEmail = async (req, res) => {
   try {
-    const { docId, appointmentId, subject, message } = req.body;
+    const { docId, appointmentId, subject, message, meetingData } = req.body;
 
     if (!subject || !message) {
       return res.json({
@@ -1008,6 +1008,9 @@ const sendCustomEmail = async (req, res) => {
     );
 
     if (emailSent) {
+      if (meetingData) {
+        await appointmentModel.findByIdAndUpdate(appointmentId, { meetingData });
+      }
       res.json({ success: true, message: "Email sent successfully" });
     } else {
       res.json({

@@ -19,6 +19,7 @@ import VirtualMeet from './pages/VirtualMeet'
 import DoctorDashboard from './pages/doctor/DoctorDashboard'
 import DoctorAppointments from './pages/doctor/DoctorAppointments'
 import DoctorProfile from './pages/doctor/DoctorProfile'
+import SendMeeting from './pages/doctor/SendMeeting'
 
 const App = () => {
   const { aToken } = useContext(AdminContext)
@@ -42,6 +43,7 @@ const App = () => {
               <Route path='/doctor-appointments' element={<DoctorAppointments />} />
               <Route path='/doctor-profile' element={<DoctorProfile />} />
               <Route path='/doctor-virtual-meet' element={<VirtualMeet />} />
+              <Route path='/doctor-send-meeting' element={<SendMeeting />} />
               {/* Fallback: redirect all unknown paths to doctor dashboard */}
               <Route path='*' element={<DoctorDashboard />} />
             </Routes>

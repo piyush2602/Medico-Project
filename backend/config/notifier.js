@@ -1,6 +1,15 @@
 import axios from 'axios';
 import 'dotenv/config';
 
+const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+const formatDate = (slotDate) => {
+    if (!slotDate) return '';
+    const dateArray = slotDate.split('_');
+    if (dateArray.length !== 3) return slotDate;
+    return dateArray[0] + "/" + months[Number(dateArray[1]) - 1] + "/" + dateArray[2];
+};
+
 // Helper function to send email via Brevo HTTP API
 const sendMail = async (to, subject, htmlContent) => {
     try {
@@ -59,7 +68,7 @@ export const sendAppointmentConfirmation = async (patientEmail, doctorEmail, pat
             <h2 style="color: #22C55E;">Appointment Confirmed!</h2>
             <p>Hi ${patientName},</p>
             <p>Your appointment with <strong>${doctorName}</strong> has been successfully booked.</p>
-            <p><strong>Date:</strong> ${date}</p>
+            <p><strong>Date:</strong> ${formatDate(date)}</p>
             <p><strong>Time:</strong> ${time}</p>
             <br>
             <p>Thank you for choosing Medico.</p>
@@ -72,7 +81,7 @@ export const sendAppointmentConfirmation = async (patientEmail, doctorEmail, pat
             <h2 style="color: #5F6FFF;">New Appointment</h2>
             <p>Hi ${doctorName},</p>
             <p>You have a new appointment scheduled with <strong>${patientName}</strong>.</p>
-            <p><strong>Date:</strong> ${date}</p>
+            <p><strong>Date:</strong> ${formatDate(date)}</p>
             <p><strong>Time:</strong> ${time}</p>
             <br>
             <p>Please check your Medico Dashboard for details.</p>
@@ -91,7 +100,7 @@ export const sendAppointmentCancellation = async (patientEmail, doctorEmail, pat
     const html = `
         <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
             <h2 style="color: #EF4444;">Appointment Cancelled</h2>
-            <p>The appointment between <strong>${patientName}</strong> and <strong>${doctorName}</strong> scheduled for ${date} at ${time} has been cancelled by ${cancelledBy}.</p>
+            <p>The appointment between <strong>${patientName}</strong> and <strong>${doctorName}</strong> scheduled for ${formatDate(date)} at ${time} has been cancelled by ${cancelledBy}.</p>
             <br>
             <p>If you have any questions, please contact our support.</p>
         </div>
@@ -110,7 +119,7 @@ export const sendReminderEmail = async (patientEmail, patientName, doctorName, d
             <h2 style="color: #F59E0B;">Appointment Reminder</h2>
             <p>Hi ${patientName},</p>
             <p>This is a friendly reminder that you have an appointment tomorrow with <strong>${doctorName}</strong>.</p>
-            <p><strong>Date:</strong> ${date}</p>
+            <p><strong>Date:</strong> ${formatDate(date)}</p>
             <p><strong>Time:</strong> ${time}</p>
             <br>
             <p>Please ensure you are ready a few minutes before the scheduled time.</p>

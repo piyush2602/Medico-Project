@@ -155,3 +155,19 @@ export const sendDoctorCustomEmail = async (patientEmail, patientName, doctorNam
     `;
     return sendMail(patientEmail, subject, html);
 };
+
+export const sendPrescriptionAddedEmail = async (patientEmail, patientName, doctorName) => {
+    const subject = "Prescription Added - Medico";
+    const html = `
+        <div style="font-family: Arial, sans-serif; padding: 20px; color: #333; max-width: 600px; border: 1px solid #e5e7eb; border-radius: 8px;">
+            <h2 style="color: #5F6FFF; margin-top: 0;">Prescription Added</h2>
+            <p>Hi ${patientName},</p>
+            <p>Your doctor, <strong>${doctorName}</strong>, has added a new prescription to your recent appointment.</p>
+            <p>You can view and download your prescription by visiting the <strong>My Appointments</strong> section in your Medico dashboard.</p>
+            <br>
+            <p>Best regards,</p>
+            <p><strong>The Medico Team</strong></p>
+        </div>
+    `;
+    return sendMail(patientEmail, subject, html);
+};

@@ -4,7 +4,7 @@ import { AppContext } from '../context/AppContext'
 
 const FILTERS = ['All', 'Pending', 'Completed', 'Cancelled']
 
-const AllAppointments = () => {
+const TodayAppointments = () => {
     const { aToken, appointments, getAllAppointments, cancelAppointment, completeAppointment } = useContext(AdminContext)
     const { slotDateFormat } = useContext(AppContext)
     const [filter, setFilter] = useState('All')
@@ -13,7 +13,11 @@ const AllAppointments = () => {
         if (aToken) getAllAppointments()
     }, [aToken])
 
-    const filtered = appointments.filter(a => {
+    const today = new Date()
+    const todaySlotDate = `${today.getDate()}_${today.getMonth() + 1}_${today.getFullYear()}`
+    const todayAppts = appointments.filter(a => a.slotDate === todaySlotDate)
+
+    const filtered = todayAppts.filter(a => {
         if (filter === 'Pending') return !a.cancelled && !a.isCompleted
         if (filter === 'Completed') return a.isCompleted
         if (filter === 'Cancelled') return a.cancelled
@@ -38,12 +42,14 @@ const AllAppointments = () => {
         )
     }
 
+    const todayLabel = today.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+
     return (
         <div className='p-6'>
             {/* Page title */}
             <div className='mb-5'>
-                <h2 className='text-2xl font-bold text-gray-800'>All Appointments</h2>
-                <p className='text-sm text-gray-400 mt-1'>Manage all patient appointments — complete or cancel as needed.</p>
+                <h2 className='text-2xl font-bold text-gray-800'>Today's Appointments</h2>
+                <p className='text-sm text-gray-400 mt-1'>{todayLabel} — {todayAppts.length} appointment{todayAppts.length !== 1 ? 's' : ''} scheduled today.</p>
             </div>
 
             {/* Filter tabs */}
@@ -57,17 +63,19 @@ const AllAppointments = () => {
                                 ? 'bg-primary text-white shadow-md shadow-primary/30'
                                 : 'bg-white text-gray-500 border border-gray-200 hover:border-primary hover:text-primary'
                         }`}
-                    >{f} {f === 'All' ? `(${appointments.length})` : `(${appointments.filter(a => {
-                        if (f === 'Pending') return !a.cancelled && !a.isCompleted
-                        if (f === 'Completed') return a.isCompleted
-                        return a.cancelled
-                    }).length})`}</button>
+                    >
+                        {f} ({f === 'All' ? todayAppts.length : todayAppts.filter(a => {
+                            if (f === 'Pending') return !a.cancelled && !a.isCompleted
+                            if (f === 'Completed') return a.isCompleted
+                            return a.cancelled
+                        }).length})
+                    </button>
                 ))}
             </div>
 
             {/* Table */}
             <div className='bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden'>
-                {/* Table Header */}
+                {/* Header */}
                 <div className='hidden sm:grid grid-cols-[40px_2.5fr_2fr_2fr_1.5fr_1fr_1.5fr_140px] gap-4 items-center px-6 py-3 bg-gray-50/80 border-b border-gray-100 text-xs font-semibold text-gray-400 uppercase tracking-wide'>
                     <span>#</span>
                     <span>Patient</span>
@@ -82,15 +90,21 @@ const AllAppointments = () => {
                 <div className='divide-y divide-gray-50'>
                     {filtered.length === 0 && (
                         <div className='px-6 py-16 text-center'>
-                            <div className='text-5xl mb-4'>📭</div>
-                            <p className='text-gray-500 font-medium'>No {filter.toLowerCase()} appointments found</p>
+                            <div className='text-5xl mb-4'>📅</div>
+                            <p className='text-gray-500 font-medium'>
+                                {todayAppts.length === 0
+                                    ? 'No appointments scheduled for today'
+                                    : `No ${filter.toLowerCase()} appointments today`}
+                            </p>
                         </div>
                     )}
                     {filtered.map((item, idx) => (
-                        <div key={item._id} className='flex flex-wrap justify-between max-sm:gap-2 sm:grid sm:grid-cols-[40px_2.5fr_2fr_2fr_1.5fr_1fr_1.5fr_140px] gap-4 items-center px-6 py-4 hover:bg-blue-50/30 transition-colors'>
-
+                        <div
+                            key={item._id}
+                            className='flex flex-wrap justify-between max-sm:gap-2 sm:grid sm:grid-cols-[40px_2.5fr_2fr_2fr_1.5fr_1fr_1.5fr_140px] gap-4 items-center px-6 py-4 hover:bg-blue-50/30 transition-colors'
+                        >
                             {/* # */}
-                            <span className='text-xs text-gray-400 font-mono w-6'>{idx + 1}</span>
+                            <span className='text-xs text-gray-400 font-mono'>{idx + 1}</span>
 
                             {/* Patient */}
                             <div className='flex items-center gap-3 min-w-0'>
@@ -154,7 +168,6 @@ const AllAppointments = () => {
                                     </span>
                                 )}
                             </div>
-
                         </div>
                     ))}
                 </div>
@@ -163,4 +176,4 @@ const AllAppointments = () => {
     )
 }
 
-export default AllAppointments
+export default TodayAppointments

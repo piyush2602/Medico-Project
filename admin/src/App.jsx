@@ -12,9 +12,12 @@ import { Route, Routes, useLocation } from 'react-router-dom'
 // Admin pages
 import Dashboard from './pages/Dashboard'
 import AllAppointments from './pages/AllAppointments'
+import TodayAppointments from './pages/TodayAppointments'
+import MyPatients from './pages/MyPatients'
 import AddDoctor from './pages/AddDoctor'
 import DoctorsList from './pages/DoctorsList'
 import VirtualMeet from './pages/VirtualMeet'
+import AdminSendMeeting from './pages/AdminSendMeeting'
 // Doctor pages
 import DoctorDashboard from './pages/doctor/DoctorDashboard'
 import DoctorAppointments from './pages/doctor/DoctorAppointments'
@@ -67,9 +70,12 @@ const App = () => {
               <Route path='/' element={<></>} />
               <Route path='/admin-dashboard' element={<Dashboard />} />
               <Route path='/all-appointments' element={<AllAppointments />} />
+              <Route path='/today-appointments' element={<TodayAppointments />} />
+              <Route path='/my-patients' element={<MyPatients />} />
               <Route path='/add-doctor' element={<AddDoctor />} />
               <Route path='/doctor-list' element={<DoctorsList />} />
               <Route path='/virtual-meet' element={<VirtualMeet />} />
+              <Route path='/admin-send-meeting' element={<AdminSendMeeting />} />
             </Routes>
           </div>
         </div>

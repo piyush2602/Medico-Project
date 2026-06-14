@@ -5,7 +5,7 @@ import doctorModel from "../models/doctorModel.js"
 import jwt from 'jsonwebtoken'
 import appointmentModel from "../models/appointmentModel.js"
 import userModel from "../models/userModel.js"
-import { sendAppointmentCancellation } from "../config/notifier.js"
+import { sendAppointmentCancellation, sendDoctorCustomEmail } from "../config/notifier.js"
 
 
 //  API for adding doctor 
@@ -80,7 +80,7 @@ const loginAdmin = async(req,res) => {
         res.json({success:false,message:error.message})
         }
 }
-export { addDoctor, loginAdmin, allDoctors, changeAvailability, appointmentsAdmin, appointmentCancel, appointmentComplete, adminDashboard }
+export { addDoctor, loginAdmin, allDoctors, changeAvailability, appointmentsAdmin, appointmentCancel, appointmentComplete, adminDashboard, sendAdminEmail }
 
 // api for getting all doctors list for admin panel
 const allDoctors = async (req, res) => {
@@ -171,6 +171,51 @@ const adminDashboard = async (req, res) => {
         }
         
         res.json({ success: true, dashData })
+    } catch (error) {
+        console.log(error)
+        res.json({ success: false, message: error.message })
+    }
+}
+
+// api to send meeting invitation email to patient (admin)
+const sendAdminEmail = async (req, res) => {
+    try {
+        const { appointmentId, subject, message, meetingData } = req.body
+
+        if (!subject || !message) {
+            return res.json({ success: false, message: 'Subject and message are required' })
+        }
+
+        const appointmentData = await appointmentModel.findById(appointmentId)
+        if (!appointmentData) {
+            return res.json({ success: false, message: 'Appointment not found' })
+        }
+
+        const userData = await userModel.findById(appointmentData.userId)
+        const doctorData = await doctorModel.findById(appointmentData.docId)
+
+        if (!userData) {
+            return res.json({ success: false, message: 'Patient not found' })
+        }
+
+        const senderName = doctorData ? doctorData.name : 'Medico Admin'
+
+        const emailSent = await sendDoctorCustomEmail(
+            userData.email,
+            userData.name,
+            senderName,
+            subject,
+            message
+        )
+
+        if (emailSent) {
+            if (meetingData) {
+                await appointmentModel.findByIdAndUpdate(appointmentId, { meetingData })
+            }
+            res.json({ success: true, message: 'Email sent successfully' })
+        } else {
+            res.json({ success: false, message: 'Failed to send email. Check server logs.' })
+        }
     } catch (error) {
         console.log(error)
         res.json({ success: false, message: error.message })

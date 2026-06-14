@@ -88,11 +88,8 @@ export const sendAppointmentConfirmation = async (patientEmail, doctorEmail, pat
         </div>
     `;
 
-    // Send to both asynchronously
-    await Promise.all([
-        sendMail(patientEmail, patientSubject, patientHtml),
-        sendMail(doctorEmail, doctorSubject, doctorHtml)
-    ]);
+    // Send to patient only as doctor email is dummy
+    await sendMail(patientEmail, patientSubject, patientHtml);
 };
 
 export const sendAppointmentCancellation = async (patientEmail, doctorEmail, patientName, doctorName, date, time, cancelledBy) => {
@@ -106,10 +103,8 @@ export const sendAppointmentCancellation = async (patientEmail, doctorEmail, pat
         </div>
     `;
 
-    await Promise.all([
-        sendMail(patientEmail, subject, html),
-        sendMail(doctorEmail, subject, html)
-    ]);
+    // Send to patient only as doctor email is dummy
+    await sendMail(patientEmail, subject, html);
 };
 
 export const sendReminderEmail = async (patientEmail, patientName, doctorName, date, time) => {

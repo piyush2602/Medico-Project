@@ -231,6 +231,7 @@ const MyAppointments = () => {
   const [appointments, setAppointments] = useState([])
   const [previewItem, setPreviewItem] = useState(null)
   const [chatItem, setChatItem] = useState(null)
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null)
 
   const getUserAppointments = async () => {
     try {
@@ -259,6 +260,22 @@ const MyAppointments = () => {
     }
   }
 
+  const deleteAppointment = async (appointmentId) => {
+    try {
+      const { data } = await axios.post(backendUrl + '/api/user/delete-appointment', { appointmentId }, { headers: { token } })
+      if (data.success) {
+        toast.success(data.message)
+        setConfirmDeleteId(null)
+        getUserAppointments()
+      } else {
+        toast.error(data.message)
+      }
+    } catch (error) {
+      console.log(error)
+      toast.error(error.message)
+    }
+  }
+
   const downloadPrescription = useCallback((item) => {
     const doc = buildPrescriptionDoc(item, slotDateFormat)
     const fileName = `Prescription_${item.docData?.name || 'Doctor'}_${item.slotDate}.pdf`
@@ -270,114 +287,215 @@ const MyAppointments = () => {
   }, [token])
 
   return (
-    <div>
-      <p className='pb-3 mt-12 font-medium text-zinc-700 border-b'>My appointments</p>
-      <div>
-        {appointments.map((item, index) => (
-          <div className='grid grid-cols-[1fr_2fr] gap-4 sm:flex sm:gap-6 py-2 border-b' key={index}>
-            <div>
-              <img className='w-32 bg-indigo-50' src={item.docData.image} alt='' />
-            </div>
-            <div className='flex-1 text-sm text-zinc-600'>
-              <p className='text-neutral-800 font-semibold'>{item.docData.name}</p>
-              <p>{item.docData.speciality}</p>
-              <p className='text-zinc-700 font-medium mt-1'>Address:</p>
-              <p className='text-xs'>{item.docData.address.line1}</p>
-              <p className='text-xs'>{item.docData.address.line2}</p>
-              <p className='text-xs mt-1'>
-                <span className='text-sm text-neutral-700 font-medium'>Date &amp; Time:</span>{' '}
-                {slotDateFormat(item.slotDate)} | {item.slotTime}
-              </p>
-              {/* Prescription indicator */}
-              {item.prescription && (
-                <p className='text-xs mt-1 text-indigo-600 font-medium flex items-center gap-1'>
-                  <svg className='w-3 h-3' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2}
-                      d='M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' />
-                  </svg>
-                  Prescription available
-                </p>
-              )}
-            </div>
-            <div></div>
-            <div className='flex flex-col gap-2 justify-end'>
-              {!item.cancelled && !item.isCompleted && (
-                <button className='text-sm text-stone-500 text-center sm:min-w-48 py-2 border rounded hover:bg-green-600 hover:text-white transition-all duration-300'>
-                  Pay Online
-                </button>
-              )}
-              {!item.cancelled && !item.isCompleted && (
-                <button
-                  onClick={() => cancelAppointment(item._id)}
-                  className='text-sm text-stone-500 text-center sm:min-w-48 py-2 border rounded hover:bg-red-600 hover:text-white transition-all duration-300'
-                >Cancel appointment</button>
-              )}
-              {item.cancelled && !item.isCompleted && (
-                <button className='sm:min-w-48 py-2 border border-red-500 rounded text-red-500'>Appointment cancelled</button>
-              )}
-              {item.isCompleted && (
-                <button className='sm:min-w-48 py-2 border border-green-500 rounded text-green-500'>Completed</button>
-              )}
+    <div className='max-w-3xl mx-auto'>
 
-              {/* Prescription action buttons */}
-              {item.prescription && (
-                <>
-                  {/* Preview */}
-                  <button
-                    onClick={() => setPreviewItem(item)}
-                    className='text-sm font-medium text-center sm:min-w-48 py-2 border border-indigo-400 rounded text-indigo-600 hover:bg-indigo-600 hover:text-white transition-all duration-300 flex items-center justify-center gap-1.5'
-                  >
-                    <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                      <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2}
-                        d='M15 12a3 3 0 11-6 0 3 3 0 016 0z' />
-                      <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2}
-                        d='M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z' />
-                    </svg>
-                    Preview Prescription
-                  </button>
-
-                  {/* Download */}
-                  <button
-                    onClick={() => downloadPrescription(item)}
-                    className='text-sm font-medium text-center sm:min-w-48 py-2 border border-gray-300 rounded text-gray-600 hover:bg-gray-800 hover:text-white hover:border-gray-800 transition-all duration-300 flex items-center justify-center gap-1.5'
-                  >
-                    <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                      <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2}
-                        d='M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4' />
-                    </svg>
-                    Download Prescription
-                  </button>
-                </>
-              )}
-
-              {/* Chat Button */}
-              {!item.cancelled && (
-                <button
-                  onClick={() => {
-                      setChatItem(item);
-                      if (item.unreadCount > 0) {
-                          setAppointments(prev => prev.map(a => a._id === item._id ? { ...a, unreadCount: 0 } : a));
-                      }
-                  }}
-                  className='relative text-sm font-medium text-center sm:min-w-48 py-2 border border-blue-400 rounded text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300 flex items-center justify-center gap-1.5'
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                  </svg>
-                  Chat with Doctor
-                  {item.unreadCount > 0 && (
-                      <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full border border-white">
-                          {item.unreadCount}
-                      </span>
-                  )}
-                </button>
-              )}
-            </div>
-          </div>
-        ))}
+      {/* Page header */}
+      <div className='flex items-center justify-between mt-12 mb-6 pb-3 border-b border-gray-200'>
+        <div>
+          <h1 className='text-xl font-bold text-gray-800'>My Appointments</h1>
+          <p className='text-sm text-gray-400 mt-0.5'>{appointments.length} appointment{appointments.length !== 1 ? 's' : ''} total</p>
+        </div>
+        <div className='hidden sm:flex items-center gap-4 text-xs text-gray-500'>
+          <span className='flex items-center gap-1.5'><span className='w-2 h-2 rounded-full bg-indigo-500 animate-pulse inline-block'></span>Upcoming</span>
+          <span className='flex items-center gap-1.5'><span className='w-2 h-2 rounded-full bg-green-500 inline-block'></span>Completed</span>
+          <span className='flex items-center gap-1.5'><span className='w-2 h-2 rounded-full bg-red-400 inline-block'></span>Cancelled</span>
+        </div>
       </div>
 
-      {/* Full-screen PDF Preview Modal */}
+      {appointments.length === 0 && (
+        <div className='text-center py-20'>
+          <div className='text-6xl mb-4'>📭</div>
+          <p className='text-gray-500 font-medium'>No appointments yet</p>
+          <p className='text-sm text-gray-400 mt-1'>Book an appointment with a doctor to get started.</p>
+        </div>
+      )}
+
+      <div className='flex flex-col gap-5'>
+        {appointments.map((item, index) => {
+          const isPending  = !item.cancelled && !item.isCompleted
+          const isCompleted = item.isCompleted
+          const isCancelled = item.cancelled && !item.isCompleted
+
+          const borderAccent = isPending ? 'border-l-indigo-500' : isCompleted ? 'border-l-green-500' : 'border-l-red-400'
+          const cardBg       = isPending ? 'bg-white' : isCompleted ? 'bg-green-50/40' : 'bg-red-50/20'
+
+          return (
+            <div key={item._id || index}
+              className={`rounded-2xl border border-gray-100 border-l-4 ${borderAccent} ${cardBg} shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden`}
+            >
+              {/* ── Card body ── */}
+              <div className='flex flex-col sm:flex-row gap-4 p-5'>
+
+                {/* Doctor photo */}
+                <div className='flex-shrink-0'>
+                  <img
+                    src={item.docData.image}
+                    alt={item.docData.name}
+                    className={`w-24 h-24 sm:w-28 sm:h-28 rounded-xl object-cover border-2 transition-all ${
+                      isPending  ? 'border-indigo-100' :
+                      isCompleted ? 'border-green-100'  : 'border-gray-200 grayscale opacity-70'
+                    }`}
+                  />
+                </div>
+
+                {/* Info */}
+                <div className='flex-1 min-w-0'>
+                  {/* Top row: name + status badge */}
+                  <div className='flex items-start justify-between gap-2 flex-wrap'>
+                    <div>
+                      <p className={`font-bold text-base leading-tight ${isPending ? 'text-gray-900' : 'text-gray-600'}`}>
+                        {item.docData.name}
+                      </p>
+                      <p className={`text-sm font-medium mt-0.5 ${isPending ? 'text-indigo-600' : 'text-gray-400'}`}>
+                        {item.docData.speciality}
+                      </p>
+                    </div>
+
+                    {/* Status badge */}
+                    {isPending && (
+                      <span className='inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-100 text-indigo-700 border border-indigo-200 whitespace-nowrap'>
+                        <span className='w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse inline-block'></span>
+                        Upcoming
+                      </span>
+                    )}
+                    {isCompleted && (
+                      <span className='inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700 border border-green-200 whitespace-nowrap'>
+                        <svg className='w-3 h-3' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2.5} d='M5 13l4 4L19 7'/></svg>
+                        Completed
+                      </span>
+                    )}
+                    {isCancelled && (
+                      <span className='inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-600 border border-red-200 whitespace-nowrap'>
+                        <svg className='w-3 h-3' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2.5} d='M6 18L18 6M6 6l12 12'/></svg>
+                        Cancelled
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Address */}
+                  <div className='mt-2'>
+                    <p className='text-xs font-semibold text-gray-400 uppercase tracking-wide'>Address</p>
+                    <p className='text-xs text-gray-500 mt-0.5 leading-relaxed'>
+                      {item.docData.address?.line1}
+                      {item.docData.address?.line2 && <><br/>{item.docData.address.line2}</>}
+                    </p>
+                  </div>
+
+                  {/* Date chip */}
+                  <div className={`inline-flex items-center gap-1.5 mt-3 px-3 py-1.5 rounded-lg text-xs font-semibold border ${
+                    isPending  ? 'bg-indigo-50 text-indigo-700 border-indigo-100' :
+                    isCompleted ? 'bg-green-50  text-green-700  border-green-100'  :
+                                  'bg-gray-100  text-gray-500   border-gray-200'
+                  }`}>
+                    <svg className='w-3.5 h-3.5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                      <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'/>
+                    </svg>
+                    {slotDateFormat(item.slotDate)} &nbsp;·&nbsp; {item.slotTime}
+                  </div>
+
+                  {/* Sub-badges */}
+                  <div className='flex flex-wrap gap-2 mt-2'>
+                    {item.prescription && (
+                      <span className='inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-100'>
+                        <svg className='w-3 h-3' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'/></svg>
+                        Prescription ready
+                      </span>
+                    )}
+                    {item.unreadCount > 0 && (
+                      <span className='inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-500 text-white border border-blue-400'>
+                        💬 {item.unreadCount} new
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* ── Action bar ── */}
+              <div className={`px-5 pb-4 pt-1 flex flex-wrap gap-2 border-t ${
+                isPending   ? 'border-indigo-50'  :
+                isCompleted ? 'border-green-50/60' : 'border-gray-100'
+              }`}>
+
+                {/* UPCOMING */}
+                {isPending && <>
+                  <button className='flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all'>
+                    <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z'/></svg>
+                    Pay Online
+                  </button>
+                  <button
+                    onClick={() => cancelAppointment(item._id)}
+                    className='flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold bg-red-50 text-red-600 border border-red-200 hover:bg-red-600 hover:text-white transition-all'
+                  >
+                    <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M6 18L18 6M6 6l12 12'/></svg>
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => { setChatItem(item); if (item.unreadCount > 0) setAppointments(prev => prev.map(a => a._id === item._id ? {...a, unreadCount:0} : a)) }}
+                    className='relative flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-600 hover:text-white transition-all'
+                  >
+                    <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z'/></svg>
+                    Chat
+                    {item.unreadCount > 0 && <span className='absolute -top-2 -right-2 bg-red-500 text-white text-[9px] font-bold w-4 h-4 flex items-center justify-center rounded-full border border-white'>{item.unreadCount}</span>}
+                  </button>
+                </>}
+
+                {/* COMPLETED */}
+                {isCompleted && <>
+                  <button
+                    onClick={() => { setChatItem(item); if (item.unreadCount > 0) setAppointments(prev => prev.map(a => a._id === item._id ? {...a, unreadCount:0} : a)) }}
+                    className='relative flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-600 hover:text-white transition-all'
+                  >
+                    <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z'/></svg>
+                    Chat
+                    {item.unreadCount > 0 && <span className='absolute -top-2 -right-2 bg-red-500 text-white text-[9px] font-bold w-4 h-4 flex items-center justify-center rounded-full border border-white'>{item.unreadCount}</span>}
+                  </button>
+                  {item.prescription && <>
+                    <button onClick={() => setPreviewItem(item)} className='flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-600 hover:text-white transition-all'>
+                      <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 12a3 3 0 11-6 0 3 3 0 016 0z'/><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z'/></svg>
+                      View Rx
+                    </button>
+                    <button onClick={() => downloadPrescription(item)} className='flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-800 hover:text-white transition-all'>
+                      <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4'/></svg>
+                      Download Rx
+                    </button>
+                  </>}
+                  {confirmDeleteId === item._id ? (
+                    <div className='flex items-center gap-2 px-3 py-1.5 border border-red-200 rounded-lg bg-red-50'>
+                      <span className='text-xs text-red-600 font-medium'>Delete record?</span>
+                      <button onClick={() => deleteAppointment(item._id)} className='text-xs font-bold text-white bg-red-500 hover:bg-red-600 px-2.5 py-1 rounded transition-colors'>Yes</button>
+                      <button onClick={() => setConfirmDeleteId(null)} className='text-xs font-bold text-gray-500 px-2 py-1'>No</button>
+                    </div>
+                  ) : (
+                    <button onClick={() => setConfirmDeleteId(item._id)} className='flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm text-gray-400 border border-gray-200 hover:border-red-400 hover:text-red-500 hover:bg-red-50 transition-all'>
+                      <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16'/></svg>
+                      Erase Record
+                    </button>
+                  )}
+                </>}
+
+                {/* CANCELLED */}
+                {isCancelled && <>
+                  {confirmDeleteId === item._id ? (
+                    <div className='flex items-center gap-2 px-3 py-1.5 border border-red-200 rounded-lg bg-red-50'>
+                      <span className='text-xs text-red-600 font-medium'>Delete record?</span>
+                      <button onClick={() => deleteAppointment(item._id)} className='text-xs font-bold text-white bg-red-500 hover:bg-red-600 px-2.5 py-1 rounded transition-colors'>Yes</button>
+                      <button onClick={() => setConfirmDeleteId(null)} className='text-xs font-bold text-gray-500 px-2 py-1'>No</button>
+                    </div>
+                  ) : (
+                    <button onClick={() => setConfirmDeleteId(item._id)} className='flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm text-gray-400 border border-gray-200 hover:border-red-400 hover:text-red-500 hover:bg-red-50 transition-all'>
+                      <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16'/></svg>
+                      Erase Record
+                    </button>
+                  )}
+                </>}
+
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* PDF Preview Modal */}
       {previewItem && (
         <PrescriptionPreviewModal
           item={previewItem}

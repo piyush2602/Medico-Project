@@ -97,13 +97,31 @@ const AdminContextProvider = (props) => {
         }
     }
 
+    const sendEmailToPatient = async (appointmentId, subject, message, meetingData = null) => {
+        try {
+            const { data } = await axios.post(backendUrl + '/api/admin/send-email', { appointmentId, subject, message, meetingData }, { headers: { aToken } })
+            if (data.success) {
+                toast.success('Email sent to patient!')
+                getAllAppointments()
+                return true
+            } else {
+                toast.error(data.message)
+                return false
+            }
+        } catch (error) {
+            toast.error(error.message)
+            return false
+        }
+    }
+
     const value = {
         aToken, setAToken,
         backendUrl, doctors,
         getAllDoctors, changeAvailability,
         appointments, setAppointments,
         getAllAppointments, cancelAppointment, completeAppointment,
-        dashData, getDashData
+        dashData, getDashData,
+        sendEmailToPatient
     }
 
     return (

@@ -249,6 +249,37 @@ const cancelAppointment = async (req, res) => {
     }
 }
 
+// api to permanently delete a completed or cancelled appointment from db
+const deleteAppointment = async (req, res) => {
+    try {
+        const { userId, appointmentId } = req.body
+
+        const appointmentData = await appointmentModel.findById(appointmentId)
+
+        if (!appointmentData) {
+            return res.json({ success: false, message: 'Appointment not found' })
+        }
+
+        // verify appointment belongs to this user
+        if (appointmentData.userId !== userId) {
+            return res.json({ success: false, message: 'Unauthorized action' })
+        }
+
+        // only allow deletion of completed or cancelled appointments
+        if (!appointmentData.cancelled && !appointmentData.isCompleted) {
+            return res.json({ success: false, message: 'Only completed or cancelled appointments can be deleted' })
+        }
+
+        await appointmentModel.findByIdAndDelete(appointmentId)
+
+        res.json({ success: true, message: 'Appointment record deleted successfully' })
+
+    } catch (error) {
+        console.log(error)
+        res.json({ success: false, message: error.message })
+    }
+}
+
 // api to get chat history for an appointment
 const getChatHistory = async (req, res) => {
     try {
@@ -295,4 +326,4 @@ const uploadChatAttachment = async (req, res) => {
     }
 }
 
-export { registerUser, loginUser, getProfile, updateProfile, bookAppointment, listAppointment, cancelAppointment, getChatHistory, uploadChatAttachment }
+export { registerUser, loginUser, getProfile, updateProfile, bookAppointment, listAppointment, cancelAppointment, deleteAppointment, getChatHistory, uploadChatAttachment }

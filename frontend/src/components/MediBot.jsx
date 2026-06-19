@@ -88,8 +88,13 @@ const MediBot = () => {
                                         ? 'bg-green-500 text-white rounded-tr-sm' 
                                         : 'bg-white text-gray-800 border border-gray-100 shadow-sm rounded-tl-sm'
                                 }`}>
-                                    {/* Simple markdown parsing for bold text */}
                                     {msg.text.split('\n').map((line, i) => {
+                                        // Style medical disclaimers in red
+                                        const hasDisclaimer = line.toLowerCase().includes('not a doctor') || line.toLowerCase().includes('consult a qualified healthcare professional');
+                                        const pClass = hasDisclaimer 
+                                            ? "min-h-[1em] text-red-600 font-medium text-xs bg-red-50 p-2 rounded mt-2 border border-red-100" 
+                                            : "min-h-[1em]";
+                                            
                                         // Replace **text** with bold tags
                                         const formattedLine = line.split(/(\*\*.*?\*\*)/g).map((part, index) => {
                                             if (part.startsWith('**') && part.endsWith('**')) {
@@ -97,7 +102,7 @@ const MediBot = () => {
                                             }
                                             return part;
                                         });
-                                        return <p key={i} className="min-h-[1em]">{formattedLine}</p>;
+                                        return <p key={i} className={pClass}>{formattedLine}</p>;
                                     })}
                                 </div>
                             </div>

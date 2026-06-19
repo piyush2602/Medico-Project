@@ -11,6 +11,7 @@ import Appointment from './pages/Appointment'
 import AIRecommendation from './pages/AIRecommendation'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
+import MediBot from './components/MediBot'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
@@ -32,6 +33,7 @@ const App = () => {
         <Route path='/ai-recommendation' element={<AIRecommendation />} />
       </Routes>
       <Footer />
+      <MediBot />
     </div>
   )
 }

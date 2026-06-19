@@ -40,6 +40,13 @@
 - ✅ Toggle doctor availability
 - 📈 View statistics and insights
 
+### 🩺 **For Doctors**
+- 🏥 Dedicated doctor dashboard to view daily statistics
+- 📅 View and manage assigned appointments (mark as completed/cancelled)
+- 🎥 Host virtual meetings with patients
+- ✉️ Send meeting links directly to patients
+- 👤 Manage and update personal profile and earnings
+
 ### 🤖 **AI & Machine Learning Integration**
 - **MediBot Conversational AI:** A floating, context-aware chatbot powered by **Gemini 2.5 Flash** that answers health queries, remembers conversation history, and acts as a 24/7 medical assistant.
 - **AI Symptom Checker:** Users can type their symptoms to get an instant AI-powered recommendation for the right medical specialist. Powered by **Google Gemini 2.0 Flash**.

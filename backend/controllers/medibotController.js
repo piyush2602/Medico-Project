@@ -24,9 +24,9 @@ const chatWithMediBot = async (req, res) => {
 
         const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
         
-        // We use gemini-2.5-flash as it is fast and supports system instructions
+        // We use gemini-2.0-flash as it is fast and supports system instructions
         const model = genAI.getGenerativeModel({ 
-            model: "gemini-2.5-flash",
+            model: "gemini-2.0-flash",
             systemInstruction: SYSTEM_INSTRUCTION
         });
 

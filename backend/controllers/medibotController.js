@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import Groq from "groq-sdk";
 
 const SYSTEM_INSTRUCTION = `You are MediBot, a helpful, empathetic, and professional AI healthcare assistant for the Medico platform. 
 Your goal is to answer health-related questions, guide patients, and provide general wellness advice.
@@ -18,39 +18,33 @@ const chatWithMediBot = async (req, res) => {
             return res.json({ success: false, message: 'Message is required' });
         }
 
-        if (!process.env.GEMINI_API_KEY) {
-            return res.json({ success: false, message: 'Gemini API key is not configured on the server.' });
+        if (!process.env.GROQ_API_KEY) {
+            return res.json({ success: false, message: 'Groq API key is not configured on the server.' });
         }
 
-        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-        
-        // We use gemini-2.0-flash as it is fast and supports system instructions
-        const model = genAI.getGenerativeModel({ 
-            model: "gemini-2.0-flash",
-            systemInstruction: SYSTEM_INSTRUCTION
-        });
+        const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-        // Format history for Gemini API
-        // Gemini expects: { role: "user" | "model", parts: [{ text: "..." }] }
+        // Format history for Groq API
+        // Groq expects: { role: "user" | "assistant" | "system", content: "..." }
         let formattedHistory = (history || []).map(msg => ({
-            role: msg.role === 'bot' ? 'model' : 'user',
-            parts: [{ text: msg.text }]
+            role: msg.role === 'bot' ? 'assistant' : 'user',
+            content: msg.text
         }));
 
-        // Gemini requires the first message in history to be from the 'user'
-        while (formattedHistory.length > 0 && formattedHistory[0].role === 'model') {
-            formattedHistory.shift();
-        }
+        // Build the messages array
+        const messages = [
+            { role: "system", content: SYSTEM_INSTRUCTION },
+            ...formattedHistory,
+            { role: "user", content: message }
+        ];
 
-        const chat = model.startChat({
-            history: formattedHistory,
-            generationConfig: {
-                maxOutputTokens: 800,
-            },
+        const completion = await groq.chat.completions.create({
+            messages: messages,
+            model: "llama3-8b-8192",
+            max_tokens: 800,
         });
 
-        const result = await chat.sendMessage(message);
-        const responseText = result.response.text();
+        const responseText = completion.choices[0]?.message?.content || "I am sorry, I couldn't generate a response.";
 
         res.json({ success: true, response: responseText });
 

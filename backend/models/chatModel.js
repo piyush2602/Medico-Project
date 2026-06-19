@@ -12,6 +12,9 @@ const chatSchema = new mongoose.Schema({
     timestamp: { type: Number, required: true }
 })
 
+// Index for fast unread-count lookups per appointment
+chatSchema.index({ appointmentId: 1, sender: 1, isRead: 1 })
+
 const chatModel = mongoose.models.chat || mongoose.model('chat', chatSchema)
 
 export default chatModel

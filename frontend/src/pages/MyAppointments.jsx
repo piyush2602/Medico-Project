@@ -4,6 +4,7 @@ import axios from 'axios'
 import { toast } from 'react-toastify'
 import { jsPDF } from 'jspdf'
 import ChatModal from '../components/ChatModal'
+import EmailModal from '../components/EmailModal'
 
 // ─── Shared PDF builder ────────────────────────────────────────────────────────
 const buildPrescriptionDoc = (item, slotDateFormat) => {
@@ -232,6 +233,7 @@ const MyAppointments = () => {
   const [previewItem, setPreviewItem] = useState(null)
   const [chatItem, setChatItem] = useState(null)
   const [confirmDeleteId, setConfirmDeleteId] = useState(null)
+  const [emailItem, setEmailItem] = useState(null)
 
   const getUserAppointments = async () => {
     try {
@@ -437,6 +439,13 @@ const MyAppointments = () => {
                     Chat
                     {item.unreadCount > 0 && <span className='absolute -top-2 -right-2 bg-red-500 text-white text-[9px] font-bold w-4 h-4 flex items-center justify-center rounded-full border border-white'>{item.unreadCount}</span>}
                   </button>
+                  <button
+                    onClick={() => setEmailItem(item)}
+                    className='flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold bg-teal-50 text-teal-700 border border-teal-200 hover:bg-teal-600 hover:text-white transition-all'
+                  >
+                    <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' /></svg>
+                    Email Doctor
+                  </button>
                 </>}
 
                 {/* COMPLETED */}
@@ -458,7 +467,15 @@ const MyAppointments = () => {
                       <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4'/></svg>
                       Download Rx
                     </button>
-                  </>}
+                  </>
+                  }
+                  <button
+                    onClick={() => setEmailItem(item)}
+                    className='flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold bg-teal-50 text-teal-700 border border-teal-200 hover:bg-teal-600 hover:text-white transition-all'
+                  >
+                    <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' /></svg>
+                    Email Doctor
+                  </button>
                   {confirmDeleteId === item._id ? (
                     <div className='flex items-center gap-2 px-3 py-1.5 border border-red-200 rounded-lg bg-red-50'>
                       <span className='text-xs text-red-600 font-medium'>Delete record?</span>
@@ -509,6 +526,14 @@ const MyAppointments = () => {
         <ChatModal
           appointment={chatItem}
           onClose={() => setChatItem(null)}
+        />
+      )}
+
+      {/* Email Modal */}
+      {emailItem && (
+        <EmailModal
+          appointment={emailItem}
+          onClose={() => setEmailItem(null)}
         />
       )}
     </div>

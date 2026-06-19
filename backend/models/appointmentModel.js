@@ -17,6 +17,11 @@ const appointmentSchema = new mongoose.Schema({
     // prescription shape: { medicines: [{name,dosage,frequency,duration}], instructions, followUpDate, notes, createdAt }
 })
 
+// Index for fast lookup by patient
+appointmentSchema.index({ userId: 1 })
+// Index for fast lookup by doctor
+appointmentSchema.index({ docId: 1 })
+
 const appointmentModel = mongoose.models.appointment || mongoose.model('appointment', appointmentSchema)
 
 export default appointmentModel

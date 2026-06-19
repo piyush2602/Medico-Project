@@ -1,5 +1,5 @@
 import express from 'express'
-import { registerUser, loginUser, getProfile, updateProfile, bookAppointment, listAppointment, cancelAppointment, deleteAppointment, getChatHistory, uploadChatAttachment } from '../controllers/userController.js'
+import { registerUser, loginUser, getProfile, updateProfile, bookAppointment, listAppointment, cancelAppointment, deleteAppointment, getChatHistory, uploadChatAttachment, sendEmailToDoctor } from '../controllers/userController.js'
 import authUser from '../middlewares/authUser.js'
 import upload from '../middlewares/multer.js'
 import uploadChat from '../middlewares/multerChat.js'
@@ -15,6 +15,7 @@ userRouter.post("/book-appointment", authUser, bookAppointment)
 userRouter.get("/appointments", authUser, listAppointment)
 userRouter.post("/cancel-appointment", authUser, cancelAppointment)
 userRouter.post("/delete-appointment", authUser, deleteAppointment)
+userRouter.post("/send-email", authUser, sendEmailToDoctor)
 
 // Chat routes
 userRouter.get("/chat-history/:appointmentId", authUser, getChatHistory)

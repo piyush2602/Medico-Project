@@ -151,7 +151,7 @@ export const sendDoctorCustomEmail = async (patientEmail, patientName, doctorNam
             
             <div style="background-color: #f3f4f6; padding: 15px; border-left: 4px solid #5F6FFF; border-radius: 4px; margin: 20px 0; white-space: pre-wrap; line-height: 1.5;">${customMessage}</div>
             
-            <p style="color: #6b7280; font-size: 0.9em;">If you need to reply, please use the chat feature in your Medico dashboard.</p>
+            <p style="color: #6b7280; font-size: 0.9em;">If you need to reply, please use the chat feature or email feature in your Medico dashboard.</p>
             <br>
             <p>Best regards,</p>
             <p><strong>The Medico Team</strong></p>
@@ -174,4 +174,23 @@ export const sendPrescriptionAddedEmail = async (patientEmail, patientName, doct
         </div>
     `;
     return sendMail(patientEmail, subject, html);
+};
+
+export const sendPatientCustomEmail = async (doctorEmail, doctorName, patientName, customSubject, customMessage) => {
+    const subject = customSubject || `Message from Patient ${patientName} - Medico`;
+    const html = `
+        <div style="font-family: Arial, sans-serif; padding: 20px; color: #333; max-width: 600px; border: 1px solid #e5e7eb; border-radius: 8px;">
+            <h2 style="color: #0D9488; margin-top: 0;">Message from your Patient</h2>
+            <p>Hi ${doctorName},</p>
+            <p>Your patient <strong>${patientName}</strong> has sent you a direct message regarding their appointment:</p>
+            
+            <div style="background-color: #f0fdfa; padding: 15px; border-left: 4px solid #0D9488; border-radius: 4px; margin: 20px 0; white-space: pre-wrap; line-height: 1.5;">${customMessage}</div>
+            
+            <p style="color: #6b7280; font-size: 0.9em;">If you need to reply, please use the chat feature or email feature in your Medico dashboard.</p>
+            <br>
+            <p>Best regards,</p>
+            <p><strong>The Medico Team</strong></p>
+        </div>
+    `;
+    return sendMail(doctorEmail, subject, html);
 };

@@ -6,7 +6,7 @@ import {v2 as cloudinary} from 'cloudinary'
 import appointmentModel from '../models/appointmentModel.js'
 import doctorModel from '../models/doctorModel.js'
 import chatModel from '../models/chatModel.js'
-import { sendWelcomeEmail, sendAppointmentConfirmation, sendAppointmentCancellation, sendSignInEmail } from '../config/notifier.js'
+import { sendWelcomeEmail, sendAppointmentConfirmation, sendAppointmentCancellation, sendSignInEmail, sendPatientCustomEmail } from '../config/notifier.js'
 
 // api to register user
 const registerUser = async (req, res) => {
@@ -189,20 +189,38 @@ const bookAppointment = async (req, res) => {
 const listAppointment = async (req, res) => {
     try {
         const { userId } = req.body
-        const appointments = await appointmentModel.find({ userId })
+        const appointments = await appointmentModel.find({ userId }).lean()
 
-        const appointmentsWithUnreadCount = await Promise.all(appointments.map(async (appt) => {
-            const unreadCount = await chatModel.countDocuments({
-                appointmentId: appt._id.toString(),
-                sender: 'doctor',
-                isRead: false
-            });
-            const apptObj = appt.toObject();
-            apptObj.unreadCount = unreadCount;
-            return apptObj;
-        }));
+        // Single aggregation to get unread counts for ALL appointments at once
+        const appointmentIds = appointments.map(a => a._id.toString())
+        const unreadCounts = await chatModel.aggregate([
+            {
+                $match: {
+                    appointmentId: { $in: appointmentIds },
+                    sender: 'doctor',
+                    isRead: false
+                }
+            },
+            {
+                $group: {
+                    _id: '$appointmentId',
+                    count: { $sum: 1 }
+                }
+            }
+        ])
 
-        res.json({ success: true, appointments: appointmentsWithUnreadCount })
+        // Build a lookup map: appointmentId -> unreadCount
+        const unreadMap = {}
+        for (const entry of unreadCounts) {
+            unreadMap[entry._id] = entry.count
+        }
+
+        // Attach unread counts to each appointment
+        for (const appt of appointments) {
+            appt.unreadCount = unreadMap[appt._id.toString()] || 0
+        }
+
+        res.json({ success: true, appointments })
 
     } catch (error) {
         console.log(error)
@@ -326,4 +344,51 @@ const uploadChatAttachment = async (req, res) => {
     }
 }
 
-export { registerUser, loginUser, getProfile, updateProfile, bookAppointment, listAppointment, cancelAppointment, deleteAppointment, getChatHistory, uploadChatAttachment }
+// api to send email from patient to doctor
+const sendEmailToDoctor = async (req, res) => {
+    try {
+        const { userId, appointmentId, subject, message } = req.body
+
+        if (!subject || !message) {
+            return res.json({ success: false, message: 'Subject and message are required' })
+        }
+
+        const appointmentData = await appointmentModel.findById(appointmentId)
+
+        if (!appointmentData) {
+            return res.json({ success: false, message: 'Appointment not found' })
+        }
+
+        // verify appointment belongs to this user
+        if (appointmentData.userId !== userId) {
+            return res.json({ success: false, message: 'Unauthorized action' })
+        }
+
+        const userData = await userModel.findById(userId)
+        const doctorData = await doctorModel.findById(appointmentData.docId)
+
+        if (!doctorData) {
+            return res.json({ success: false, message: 'Doctor not found' })
+        }
+
+        const emailSent = await sendPatientCustomEmail(
+            'medico.healthcare.solutions@gmail.com',
+            doctorData.name,
+            userData.name,
+            subject,
+            message
+        )
+
+        if (emailSent) {
+            res.json({ success: true, message: 'Email sent to doctor successfully' })
+        } else {
+            res.json({ success: false, message: 'Failed to send email. Please try again.' })
+        }
+
+    } catch (error) {
+        console.log(error)
+        res.json({ success: false, message: error.message })
+    }
+}
+
+export { registerUser, loginUser, getProfile, updateProfile, bookAppointment, listAppointment, cancelAppointment, deleteAppointment, getChatHistory, uploadChatAttachment, sendEmailToDoctor }

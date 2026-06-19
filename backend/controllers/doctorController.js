@@ -774,22 +774,38 @@ const loginDoctor = async (req, res) => {
 const getDocAppointments = async (req, res) => {
   try {
     const { docId } = req.body;
-    const appointments = await appointmentModel.find({ docId });
+    const appointments = await appointmentModel.find({ docId }).lean();
 
-    const appointmentsWithUnreadCount = await Promise.all(
-      appointments.map(async (appt) => {
-        const unreadCount = await chatModel.countDocuments({
-          appointmentId: appt._id.toString(),
-          sender: "patient",
-          isRead: false,
-        });
-        const apptObj = appt.toObject();
-        apptObj.unreadCount = unreadCount;
-        return apptObj;
-      })
-    );
+    // Single aggregation to get unread counts for ALL appointments at once
+    const appointmentIds = appointments.map(a => a._id.toString());
+    const unreadCounts = await chatModel.aggregate([
+      {
+        $match: {
+          appointmentId: { $in: appointmentIds },
+          sender: 'patient',
+          isRead: false
+        }
+      },
+      {
+        $group: {
+          _id: '$appointmentId',
+          count: { $sum: 1 }
+        }
+      }
+    ]);
 
-    res.json({ success: true, appointments: appointmentsWithUnreadCount.reverse() });
+    // Build a lookup map: appointmentId -> unreadCount
+    const unreadMap = {};
+    for (const entry of unreadCounts) {
+      unreadMap[entry._id] = entry.count;
+    }
+
+    // Attach unread counts to each appointment
+    for (const appt of appointments) {
+      appt.unreadCount = unreadMap[appt._id.toString()] || 0;
+    }
+
+    res.json({ success: true, appointments: appointments.reverse() });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });

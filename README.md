@@ -31,6 +31,7 @@
 - 👤 User authentication (Sign up / Login)
 - 📱 Responsive design for mobile and desktop
 - 💼 Manage appointments and profile
+- ✉️ Direct patient-to-doctor email communication for custom queries
 
 ### 🛡️ **For Admins**
 - 📊 Dashboard with analytics
@@ -40,6 +41,7 @@
 - 📈 View statistics and insights
 
 ### 🤖 **AI & Machine Learning Integration**
+- **MediBot Conversational AI:** A floating, context-aware chatbot powered by **Gemini 2.5 Flash** that answers health queries, remembers conversation history, and acts as a 24/7 medical assistant.
 - **AI Symptom Checker:** Users can type their symptoms to get an instant AI-powered recommendation for the right medical specialist. Powered by **Google Gemini 2.0 Flash**.
 - **Medical Report Analyzer:** Users can upload lab reports (PDF, JPG, PNG) for automated analysis.
   - Features **Tesseract.js OCR** for image-based reports and **pdf-parse** for PDFs.
@@ -108,6 +110,8 @@ Medico/
 - `POST /api/user/book-appointment` - Book appointment
 - `GET /api/user/appointments` - Get user appointments
 - `POST /api/user/cancel-appointment` - Cancel appointment
+- `POST /api/user/send-email` - Send email to doctor
+- `POST /api/user/medibot` - Chat with MediBot AI
 
 ### Admin Routes
 - `POST /api/admin/login` - Admin login

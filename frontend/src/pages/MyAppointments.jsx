@@ -5,6 +5,10 @@ import { toast } from 'react-toastify'
 import { jsPDF } from 'jspdf'
 import ChatModal from '../components/ChatModal'
 import EmailModal from '../components/EmailModal'
+import CertificateDocument, { getCertNumber } from '../components/CertificateDocument'
+
+
+
 
 // ─── Shared PDF builder ────────────────────────────────────────────────────────
 const buildPrescriptionDoc = (item, slotDateFormat) => {
@@ -149,13 +153,11 @@ const PrescriptionPreviewModal = ({ item, onClose, slotDateFormat }) => {
 
   useEffect(() => {
     document.body.style.overflow = 'hidden'
-    // Build PDF and get blob URL for the iframe
     const doc = buildPrescriptionDoc(item, slotDateFormat)
     const url = doc.output('bloburl')
     setPdfUrl(url)
     return () => {
       document.body.style.overflow = ''
-      // Revoke object URL to free memory
       if (url) URL.revokeObjectURL(url)
     }
   }, [item])
@@ -168,8 +170,6 @@ const PrescriptionPreviewModal = ({ item, onClose, slotDateFormat }) => {
 
   return (
     <div className='fixed inset-0 z-50 flex flex-col bg-black/70 backdrop-blur-sm'>
-
-      {/* Top bar */}
       <div className='flex items-center justify-between px-5 py-3 bg-gray-900 text-white flex-shrink-0'>
         <div className='flex items-center gap-3'>
           <span className='w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-xs font-bold'>Rx</span>
@@ -186,27 +186,16 @@ const PrescriptionPreviewModal = ({ item, onClose, slotDateFormat }) => {
             className='flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold transition-all'
           >
             <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-              <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2}
-                d='M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4' />
+              <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4' />
             </svg>
             Download PDF
           </button>
-          <button
-            onClick={onClose}
-            className='w-9 h-9 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center text-white text-xl transition-all'
-          >×</button>
+          <button onClick={onClose} className='w-9 h-9 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center text-white text-xl transition-all'>×</button>
         </div>
       </div>
-
-      {/* PDF iframe area */}
       <div className='flex-1 overflow-hidden bg-gray-700 flex items-center justify-center p-4'>
         {pdfUrl ? (
-          <iframe
-            src={pdfUrl}
-            title='Prescription Preview'
-            className='w-full max-w-3xl h-full rounded-lg shadow-2xl border-0'
-            style={{ minHeight: '500px' }}
-          />
+          <iframe src={pdfUrl} title='Prescription Preview' className='w-full max-w-3xl h-full rounded-lg shadow-2xl border-0' style={{ minHeight: '500px' }} />
         ) : (
           <div className='text-center text-white'>
             <div className='w-10 h-10 border-4 border-indigo-400 border-t-transparent rounded-full animate-spin mx-auto mb-3'></div>
@@ -214,14 +203,97 @@ const PrescriptionPreviewModal = ({ item, onClose, slotDateFormat }) => {
           </div>
         )}
       </div>
-
-      {/* Bottom hint */}
       <div className='px-5 py-2 bg-gray-900 text-center flex-shrink-0'>
-        <p className='text-xs text-gray-500'>
-          Use your browser's PDF controls to zoom or print. Click <strong className='text-gray-400'>Download PDF</strong> to save a copy.
-        </p>
+        <p className='text-xs text-gray-500'>Use your browser's PDF controls to zoom or print. Click <strong className='text-gray-400'>Download PDF</strong> to save a copy.</p>
+      </div>
+    </div>
+  )
+}
+
+// ─── Certificate Preview Modal (HTML-based, print-to-PDF) ─────────────────────
+const CertificatePreviewModal = ({ item, onClose }) => {
+  const cert = item.medicalCertificate
+  const certNumber = getCertNumber(item._id)
+  const verificationId = (item._id || '').slice(-8).toUpperCase()
+  const issuedDate = cert?.issuedAt
+    ? new Date(cert.issuedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+    : ''
+
+  useEffect(() => {
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = '' }
+  }, [])
+
+  const handlePrint = () => {
+    const el = document.getElementById('medical-certificate-doc')
+    if (!el) return
+    const win = window.open('', '_blank', 'width=900,height=700')
+    win.document.write(`<!DOCTYPE html><html><head>
+      <title>Medical Certificate – ${certNumber}</title>
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+      <style>
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+        @page{size:A4 portrait;margin:0}
+      </style>
+    </head><body>${el.outerHTML}</body></html>`)
+    win.document.close()
+    win.focus()
+    setTimeout(() => win.print(), 700)
+  }
+
+  return (
+    <div className='fixed inset-0 z-50 flex flex-col' style={{ background: '#F3F4F6' }}>
+      {/* Top bar */}
+      <div className='flex items-center justify-between px-6 py-3 bg-white border-b border-gray-200 shadow-sm flex-shrink-0'>
+        <div className='flex items-center gap-3'>
+          <div className='w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0'>
+            <svg className='w-4 h-4 text-white' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+              <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4' />
+            </svg>
+          </div>
+          <div>
+            <p className='text-sm font-semibold text-gray-800'>Medical Certificate</p>
+            <p className='text-xs text-gray-400'>
+              {item.docData?.name} · Issued {issuedDate}
+              <span className='ml-2 font-mono text-gray-400'>{certNumber}</span>
+            </p>
+          </div>
+        </div>
+        <div className='flex items-center gap-2'>
+          <button
+            onClick={handlePrint}
+            className='flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition-all shadow-sm'
+          >
+            <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+              <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z' />
+            </svg>
+            Print / Save PDF
+          </button>
+          <button onClick={onClose} className='w-9 h-9 rounded-lg border border-gray-200 hover:bg-gray-50 flex items-center justify-center text-gray-400 text-xl transition-all'>×</button>
+        </div>
       </div>
 
+      {/* Certificate render area */}
+      <div className='flex-1 overflow-auto py-8 px-4'>
+        <div className='mx-auto shadow-2xl' style={{ width: 'fit-content', borderRadius: '2px' }}>
+          <CertificateDocument
+            cert={cert}
+            appointment={item}
+            docProfile={item.docData}
+            certNumber={certNumber}
+            verificationId={verificationId}
+          />
+        </div>
+      </div>
+
+      {/* Bottom hint */}
+      <div className='px-6 py-2 bg-white border-t border-gray-100 text-center flex-shrink-0'>
+        <p className='text-xs text-gray-400'>
+          Click <strong className='text-gray-500'>Print / Save PDF</strong> to export this certificate as a PDF via your browser's print dialog.
+        </p>
+      </div>
     </div>
   )
 }
@@ -231,6 +303,7 @@ const MyAppointments = () => {
   const { backendUrl, token, slotDateFormat } = useContext(AppContext)
   const [appointments, setAppointments] = useState([])
   const [previewItem, setPreviewItem] = useState(null)
+  const [certPreviewItem, setCertPreviewItem] = useState(null)
   const [chatItem, setChatItem] = useState(null)
   const [confirmDeleteId, setConfirmDeleteId] = useState(null)
   const [emailItem, setEmailItem] = useState(null)
@@ -282,6 +355,11 @@ const MyAppointments = () => {
     const doc = buildPrescriptionDoc(item, slotDateFormat)
     const fileName = `Prescription_${item.docData?.name || 'Doctor'}_${item.slotDate}.pdf`
     doc.save(fileName.replace(/\s+/g, '_'))
+  }, [])
+
+  const downloadCertificate = useCallback((item) => {
+    // Opens certificate in a new window with print dialog for Save as PDF
+    setCertPreviewItem(item)
   }, [])
 
   useEffect(() => {
@@ -403,6 +481,23 @@ const MyAppointments = () => {
                         Prescription ready
                       </span>
                     )}
+                    {item.medicalCertificate && (
+                      <span className='inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-teal-50 text-teal-700 border border-teal-100'>
+                        <svg className='w-3 h-3' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                          <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4' />
+                        </svg>
+                        Medical Certificate
+                        {item.medicalCertificate.fitForDuty != null && (
+                          <span className={`ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
+                            item.medicalCertificate.fitForDuty
+                              ? 'bg-emerald-100 text-emerald-700'
+                              : 'bg-amber-100 text-amber-700'
+                          }`}>
+                            {item.medicalCertificate.fitForDuty ? 'Fit' : 'Unfit'}
+                          </span>
+                        )}
+                      </span>
+                    )}
                     {item.unreadCount > 0 && (
                       <span className='inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-500 text-white border border-blue-400'>
                         💬 {item.unreadCount} new
@@ -467,8 +562,27 @@ const MyAppointments = () => {
                       <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4'/></svg>
                       Download Rx
                     </button>
-                  </>
-                  }
+                  </>}
+                  {item.medicalCertificate && <>
+                    <button
+                      onClick={() => setCertPreviewItem(item)}
+                      className='flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold bg-teal-50 text-teal-700 border border-teal-200 hover:bg-teal-600 hover:text-white transition-all'
+                    >
+                      <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                        <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4' />
+                      </svg>
+                      View Certificate
+                    </button>
+                    <button
+                      onClick={() => downloadCertificate(item)}
+                      className='flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-600 hover:text-white transition-all'
+                    >
+                      <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                        <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4' />
+                      </svg>
+                      Download Cert
+                    </button>
+                  </>}
                   <button
                     onClick={() => setEmailItem(item)}
                     className='flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold bg-teal-50 text-teal-700 border border-teal-200 hover:bg-teal-600 hover:text-white transition-all'
@@ -512,12 +626,20 @@ const MyAppointments = () => {
         })}
       </div>
 
-      {/* PDF Preview Modal */}
+      {/* Prescription Preview Modal */}
       {previewItem && (
         <PrescriptionPreviewModal
           item={previewItem}
           onClose={() => setPreviewItem(null)}
           slotDateFormat={slotDateFormat}
+        />
+      )}
+
+      {/* Certificate Preview Modal */}
+      {certPreviewItem && (
+        <CertificatePreviewModal
+          item={certPreviewItem}
+          onClose={() => setCertPreviewItem(null)}
         />
       )}
 

@@ -162,6 +162,28 @@ const DoctorContextProvider = (props) => {
         }
     }
 
+    // ── Save Medical Certificate ───────────────────────────────────────────────
+    const saveMedicalCertificate = async (appointmentId, certificate) => {
+        try {
+            const { data } = await axios.post(
+                backendUrl + '/api/doctor/save-medical-certificate',
+                { appointmentId, certificate },
+                { headers: { dtoken: dToken } }
+            )
+            if (data.success) {
+                toast.success(data.message)
+                getDocAppointments()
+                return true
+            } else {
+                toast.error(data.message)
+                return false
+            }
+        } catch (error) {
+            toast.error(error.message)
+            return false
+        }
+    }
+
     const value = {
         dToken, setDToken,
         backendUrl,
@@ -172,6 +194,7 @@ const DoctorContextProvider = (props) => {
         getDocAppointments,
         cancelAppointment, completeAppointment,
         savePrescription,
+        saveMedicalCertificate,
         getDocProfile,
         sendEmailToPatient
     }

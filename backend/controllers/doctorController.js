@@ -990,6 +990,26 @@ const eraseChatHistory = async (req, res) => {
   }
 };
 
+// ─── Save Medical Certificate ─────────────────────────────────────────────────
+const saveMedicalCertificate = async (req, res) => {
+  try {
+    const { docId, appointmentId, certificate } = req.body;
+    const appointmentData = await appointmentModel.findById(appointmentId);
+
+    if (!appointmentData || appointmentData.docId !== docId) {
+      return res.json({ success: false, message: "Unauthorized action" });
+    }
+
+    certificate.issuedAt = new Date().toISOString();
+    await appointmentModel.findByIdAndUpdate(appointmentId, { medicalCertificate: certificate });
+
+    res.json({ success: true, message: "Medical certificate issued successfully" });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
 // ─── Send Custom Email to Patient ──────────────────────────────────────────
 const sendCustomEmail = async (req, res) => {
   try {
@@ -1050,6 +1070,7 @@ export {
   docCancelAppointment,
   docCompleteAppointment,
   savePrescription,
+  saveMedicalCertificate,
   getDocProfile,
   getDocChatHistory,
   uploadDocChatAttachment,

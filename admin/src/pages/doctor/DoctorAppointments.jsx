@@ -4,6 +4,7 @@ import { AppContext } from '../../context/AppContext'
 import PrescriptionModal from './PrescriptionModal'
 import DoctorChatModal from './DoctorChatModal'
 import DoctorEmailModal from './DoctorEmailModal'
+import MedicalCertificateModal from './MedicalCertificateModal'
 
 const FILTERS = ['All', 'Pending', 'Completed', 'Cancelled']
 
@@ -14,6 +15,7 @@ const DoctorAppointments = ({ isToday = false }) => {
     const [prescriptionAppt, setPrescriptionAppt] = useState(null)
     const [chatAppt, setChatAppt] = useState(null)
     const [emailAppt, setEmailAppt] = useState(null)
+    const [certAppt, setCertAppt] = useState(null)
 
     useEffect(() => {
         if (dToken) getDocAppointments()
@@ -78,7 +80,7 @@ const DoctorAppointments = ({ isToday = false }) => {
             {/* Table */}
             <div className='bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden'>
                 {/* Table Header */}
-                <div className='grid grid-cols-[40px_3fr_2fr_1fr_1.5fr_190px] gap-4 items-center px-6 py-3 bg-gray-50/80 border-b border-gray-100 text-xs font-semibold text-gray-400 uppercase tracking-wide'>
+                <div className='grid grid-cols-[40px_3fr_2fr_1fr_1.5fr_220px] gap-4 items-center px-6 py-3 bg-gray-50/80 border-b border-gray-100 text-xs font-semibold text-gray-400 uppercase tracking-wide'>
                     <span>#</span>
                     <span>Patient</span>
                     <span>Date & Time</span>
@@ -95,7 +97,7 @@ const DoctorAppointments = ({ isToday = false }) => {
                         </div>
                     )}
                     {filtered.map((item, idx) => (
-                        <div key={item._id} className='grid grid-cols-[40px_3fr_2fr_1fr_1.5fr_190px] gap-4 items-center px-6 py-4 hover:bg-blue-50/30 transition-colors'>
+                        <div key={item._id} className='grid grid-cols-[40px_3fr_2fr_1fr_1.5fr_220px] gap-4 items-center px-6 py-4 hover:bg-blue-50/30 transition-colors'>
 
                             {/* # */}
                             <span className='text-xs text-gray-400 font-mono w-6'>{idx + 1}</span>
@@ -192,6 +194,23 @@ const DoctorAppointments = ({ isToday = false }) => {
                                         </svg>
                                     </button>
                                 )}
+                                {/* Medical Certificate button - available when not cancelled */}
+                                {!item.cancelled && (
+                                    <button
+                                        onClick={() => setCertAppt(item)}
+                                        title={item.medicalCertificate ? 'Edit Medical Certificate' : 'Issue Medical Certificate'}
+                                        className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all text-sm ${
+                                            item.medicalCertificate
+                                                ? 'bg-teal-100 text-teal-600 hover:bg-teal-500 hover:text-white'
+                                                : 'bg-gray-100 text-gray-500 hover:bg-teal-500 hover:text-white'
+                                        }`}
+                                    >
+                                        <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                                            <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2}
+                                                d='M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4' />
+                                        </svg>
+                                    </button>
+                                )}
                             </div>
 
                         </div>
@@ -220,6 +239,14 @@ const DoctorAppointments = ({ isToday = false }) => {
                 <DoctorEmailModal
                     appointment={emailAppt}
                     onClose={() => setEmailAppt(null)}
+                />
+            )}
+
+            {/* Medical Certificate Modal */}
+            {certAppt && (
+                <MedicalCertificateModal
+                    appointment={certAppt}
+                    onClose={() => setCertAppt(null)}
                 />
             )}
         </div>

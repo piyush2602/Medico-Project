@@ -13,8 +13,10 @@ const appointmentSchema = new mongoose.Schema({
     payment: { type: Boolean, default: false },
     isCompleted: { type: Boolean, default: false },
     prescription: { type: Object, default: null },
-    meetingData: { type: Object, default: null }
+    meetingData: { type: Object, default: null },
+    medicalCertificate: { type: Object, default: null }
     // prescription shape: { medicines: [{name,dosage,frequency,duration}], instructions, followUpDate, notes, createdAt }
+    // medicalCertificate shape: { patientName, age, gender, diagnosis, fitForDuty, leaveDays, fromDate, toDate, remarks, issuedAt }
 })
 
 // Index for fast lookup by patient

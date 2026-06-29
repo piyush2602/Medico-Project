@@ -80,7 +80,7 @@ const DoctorAppointments = ({ isToday = false }) => {
             {/* Table */}
             <div className='bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden'>
                 {/* Table Header */}
-                <div className='grid grid-cols-[40px_3fr_2fr_1fr_1.5fr_220px] gap-4 items-center px-6 py-3 bg-gray-50/80 border-b border-gray-100 text-xs font-semibold text-gray-400 uppercase tracking-wide'>
+                <div className='hidden sm:grid sm:grid-cols-[40px_3fr_2fr_1fr_1.5fr_220px] gap-4 items-center px-6 py-3 bg-gray-50/80 border-b border-gray-100 text-xs font-semibold text-gray-400 uppercase tracking-wide'>
                     <span>#</span>
                     <span>Patient</span>
                     <span>Date & Time</span>
@@ -97,38 +97,51 @@ const DoctorAppointments = ({ isToday = false }) => {
                         </div>
                     )}
                     {filtered.map((item, idx) => (
-                        <div key={item._id} className='grid grid-cols-[40px_3fr_2fr_1fr_1.5fr_220px] gap-4 items-center px-6 py-4 hover:bg-blue-50/30 transition-colors'>
+                        <div key={item._id} className='flex flex-col sm:grid sm:grid-cols-[40px_3fr_2fr_1fr_1.5fr_220px] gap-3 sm:gap-4 sm:items-center px-4 sm:px-6 py-4 hover:bg-blue-50/30 transition-colors border-b sm:border-b-0 border-gray-50'>
 
                             {/* # */}
-                            <span className='text-xs text-gray-400 font-mono w-6'>{idx + 1}</span>
+                            <span className='hidden sm:block text-xs text-gray-400 font-mono w-6'>{idx + 1}</span>
 
                             {/* Patient */}
-                            <div className='flex items-center gap-3 min-w-0'>
-                                <img
-                                    src={item.userData?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(item.userData?.name || 'P')}&background=6366f1&color=fff`}
-                                    alt={item.userData?.name}
-                                    className='w-9 h-9 rounded-full object-cover border border-gray-100 flex-shrink-0'
-                                />
-                                <div className='min-w-0'>
-                                    <p className='font-semibold text-gray-800 text-sm truncate'>{item.userData?.name}</p>
-                                    <p className='text-xs text-gray-400 truncate'>{item.userData?.email}</p>
+                            <div className='flex items-center justify-between sm:justify-start gap-3 min-w-0'>
+                                <div className='flex items-center gap-3 min-w-0'>
+                                    <img
+                                        src={item.userData?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(item.userData?.name || 'P')}&background=6366f1&color=fff`}
+                                        alt={item.userData?.name}
+                                        className='w-9 h-9 rounded-full object-cover border border-gray-100 flex-shrink-0'
+                                    />
+                                    <div className='min-w-0'>
+                                        <p className='font-semibold text-gray-800 text-sm truncate'>{item.userData?.name}</p>
+                                        <p className='text-xs text-gray-400 truncate'>{item.userData?.email}</p>
+                                    </div>
+                                </div>
+                                <div className='sm:hidden'>
+                                    {statusBadge(item)}
                                 </div>
                             </div>
 
                             {/* Date & Time */}
-                            <div>
-                                <p className='text-sm text-gray-700 font-medium'>{slotDateFormat(item.slotDate)}</p>
-                                <p className='text-xs text-gray-400'>{item.slotTime}</p>
+                            <div className='flex justify-between sm:block items-center sm:items-start text-sm'>
+                                <span className='sm:hidden font-medium text-gray-500 text-xs'>Date & Time</span>
+                                <div className='text-right sm:text-left'>
+                                    <p className='text-sm text-gray-700 font-medium'>{slotDateFormat(item.slotDate)}</p>
+                                    <p className='text-xs text-gray-400'>{item.slotTime}</p>
+                                </div>
                             </div>
 
                             {/* Fees */}
-                            <span className='text-sm font-semibold text-gray-700'>₹{item.amount}</span>
+                            <div className='flex justify-between sm:block items-center sm:items-start text-sm'>
+                                <span className='sm:hidden font-medium text-gray-500 text-xs'>Fees</span>
+                                <span className='text-sm font-semibold text-gray-700'>₹{item.amount}</span>
+                            </div>
 
                             {/* Status */}
-                            {statusBadge(item)}
+                            <div className='hidden sm:block'>
+                                {statusBadge(item)}
+                            </div>
 
                             {/* Actions */}
-                            <div className='flex items-center gap-1.5'>
+                            <div className='flex items-center justify-end sm:justify-start gap-1.5 mt-2 sm:mt-0 pt-3 sm:pt-0 border-t sm:border-0 border-gray-100 flex-wrap'>
                                 {!item.cancelled && !item.isCompleted && (
                                     <>
                                         <button

@@ -86,17 +86,19 @@ const DoctorDashboard = () => {
                         </div>
                     )}
                     {dashData.latest.map((item, idx) => (
-                        <div key={idx} className='flex items-center px-6 py-3.5 gap-4 hover:bg-gray-50/80 transition-colors'>
-                            <img
-                                src={item.userData?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(item.userData?.name || 'P')}&background=6366f1&color=fff`}
-                                alt={item.userData?.name}
-                                className='w-10 h-10 rounded-full object-cover border border-gray-100'
-                            />
-                            <div className='flex-1 min-w-0'>
-                                <p className='font-semibold text-gray-800 text-sm truncate'>{item.userData?.name}</p>
-                                <p className='text-xs text-gray-400'>{slotDateFormat(item.slotDate)} | {item.slotTime}</p>
+                        <div key={idx} className='flex flex-col sm:flex-row sm:items-center px-4 sm:px-6 py-3.5 gap-3 hover:bg-gray-50/80 transition-colors border-b sm:border-b-0 border-gray-50 last:border-b-0'>
+                            <div className='flex items-center gap-3 flex-1 min-w-0 w-full'>
+                                <img
+                                    src={item.userData?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(item.userData?.name || 'P')}&background=6366f1&color=fff`}
+                                    alt={item.userData?.name}
+                                    className='w-10 h-10 rounded-full object-cover border border-gray-100 flex-shrink-0'
+                                />
+                                <div className='flex-1 min-w-0'>
+                                    <p className='font-semibold text-gray-800 text-sm truncate'>{item.userData?.name}</p>
+                                    <p className='text-xs text-gray-400 truncate'>{slotDateFormat(item.slotDate)} | {item.slotTime}</p>
+                                </div>
                             </div>
-                            <div className='flex items-center gap-2'>
+                            <div className='flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto mt-2 sm:mt-0 pt-3 sm:pt-0 border-t sm:border-t-0 border-gray-100'>
                                 {statusBadge(item)}
                                 {!item.cancelled && !item.isCompleted && (
                                     <div className='flex gap-1'>

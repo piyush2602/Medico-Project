@@ -200,8 +200,14 @@ const Notifications = () => {
   const { backendUrl, token, slotDateFormat } = useContext(AppContext)
   const [appointments, setAppointments] = useState([])
   const [filter, setFilter] = useState('All')
-  const [readIds, setReadIds] = useState(new Set())
+  const [readIds, setReadIds] = useState(() => {
+    const saved = localStorage.getItem('medico_read_notifications')
+    return saved ? new Set(JSON.parse(saved)) : new Set()
+  })
 
+  useEffect(() => {
+    localStorage.setItem('medico_read_notifications', JSON.stringify(Array.from(readIds)))
+  }, [readIds])
   useEffect(() => {
     if (!token) return
     axios.get(`${backendUrl}/api/user/appointments`, { headers: { token } })

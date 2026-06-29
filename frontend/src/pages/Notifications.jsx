@@ -2,7 +2,7 @@ import React, { useState, useContext, useEffect } from 'react'
 import { AppContext } from '../context/AppContext'
 import axios from 'axios'
 
-const FILTERS = ['All', 'Appointment', 'Prescription', 'Certificate', 'System']
+const FILTERS = ['All', 'Appointment', 'Prescription', 'Certificate', 'Message', 'System']
 
 const typeConfig = {
   Appointment: {

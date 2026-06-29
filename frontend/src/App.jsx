@@ -18,6 +18,7 @@ import 'react-toastify/dist/ReactToastify.css'
 
 const App = () => {
   return (
+    <>
     <div className='mx-4 sm:mx-[10%]'>
       <ToastContainer />
       <Navbar />
@@ -35,8 +36,9 @@ const App = () => {
         <Route path='/notifications' element={<Notifications />} />
       </Routes>
       <Footer />
-      <MediBot />
     </div>
+    <MediBot />
+    </>
   )
 }
 export default App

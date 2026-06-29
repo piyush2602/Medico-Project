@@ -50,7 +50,7 @@ const MediBot = () => {
     };
 
     return (
-        <div style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 9999 }} className="flex flex-col items-end">
+        <div className="fixed bottom-3 right-3 sm:bottom-6 sm:right-6 z-[9999] flex flex-col items-end">
             
             {/* Chat Window */}
             {isOpen && (

@@ -169,42 +169,56 @@ const PrescriptionPreviewModal = ({ item, onClose, slotDateFormat }) => {
   }
 
   return (
-    <div className='fixed inset-0 z-50 flex flex-col bg-black/70 backdrop-blur-sm'>
-      <div className='flex items-center justify-between px-5 py-3 bg-gray-900 text-white flex-shrink-0'>
+    <div className='fixed inset-0 z-50 flex flex-col' style={{ background: '#F3F4F6' }}>
+      {/* Top bar – same style as CertificatePreviewModal */}
+      <div className='flex items-center justify-between px-6 py-3 bg-white border-b border-gray-200 shadow-sm flex-shrink-0'>
         <div className='flex items-center gap-3'>
-          <span className='w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-xs font-bold'>Rx</span>
+          <div className='w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center flex-shrink-0'>
+            <span className='text-white text-xs font-bold'>Rx</span>
+          </div>
           <div>
-            <p className='font-semibold text-sm'>Prescription Preview</p>
+            <p className='text-sm font-semibold text-gray-800'>Prescription Preview</p>
             <p className='text-xs text-gray-400'>
-              {item.docData?.name} • {slotDateFormat ? slotDateFormat(item.slotDate) : item.slotDate} at {item.slotTime}
+              {item.docData?.name} · {slotDateFormat ? slotDateFormat(item.slotDate) : item.slotDate} at {item.slotTime}
             </p>
           </div>
         </div>
         <div className='flex items-center gap-2'>
           <button
             onClick={handleDownload}
-            className='flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold transition-all'
+            className='flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition-all shadow-sm'
           >
             <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
               <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4' />
             </svg>
             Download PDF
           </button>
-          <button onClick={onClose} className='w-9 h-9 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center text-white text-xl transition-all'>×</button>
+          <button onClick={onClose} className='w-9 h-9 rounded-lg border border-gray-200 hover:bg-gray-50 flex items-center justify-center text-gray-400 text-xl transition-all'>×</button>
         </div>
       </div>
-      <div className='flex-1 overflow-hidden bg-gray-700 flex items-center justify-center p-4'>
+
+      {/* PDF viewer area */}
+      <div className='flex-1 overflow-hidden flex items-center justify-center p-6 bg-gray-100'>
         {pdfUrl ? (
-          <iframe src={pdfUrl} title='Prescription Preview' className='w-full max-w-3xl h-full rounded-lg shadow-2xl border-0' style={{ minHeight: '500px' }} />
+          <iframe
+            src={pdfUrl}
+            title='Prescription Preview'
+            className='w-full max-w-3xl h-full rounded-lg shadow-2xl border border-gray-200'
+            style={{ minHeight: '500px' }}
+          />
         ) : (
-          <div className='text-center text-white'>
+          <div className='text-center'>
             <div className='w-10 h-10 border-4 border-indigo-400 border-t-transparent rounded-full animate-spin mx-auto mb-3'></div>
-            <p className='text-sm text-gray-300'>Generating preview...</p>
+            <p className='text-sm text-gray-500'>Generating preview...</p>
           </div>
         )}
       </div>
-      <div className='px-5 py-2 bg-gray-900 text-center flex-shrink-0'>
-        <p className='text-xs text-gray-500'>Use your browser's PDF controls to zoom or print. Click <strong className='text-gray-400'>Download PDF</strong> to save a copy.</p>
+
+      {/* Bottom hint */}
+      <div className='px-6 py-2 bg-white border-t border-gray-100 text-center flex-shrink-0'>
+        <p className='text-xs text-gray-400'>
+          Use your browser's PDF controls to zoom or print. Click <strong className='text-gray-500'>Download PDF</strong> to save a copy.
+        </p>
       </div>
     </div>
   )
@@ -298,6 +312,76 @@ const CertificatePreviewModal = ({ item, onClose }) => {
   )
 }
 
+// ─── Coming Soon Modal ────────────────────────────────────────────────
+const ComingSoonModal = ({ onClose }) => {
+  useEffect(() => {
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = '' }
+  }, [])
+
+  return (
+    <div
+      className='fixed inset-0 z-50 flex items-center justify-center p-4'
+      style={{ background: 'rgba(15,15,35,0.65)', backdropFilter: 'blur(8px)' }}
+      onClick={onClose}
+    >
+      <div
+        className='relative bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden'
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Gradient top accent */}
+        <div className='h-1.5 w-full' style={{ background: 'linear-gradient(90deg,#6366f1,#8b5cf6,#ec4899)' }} />
+
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className='absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-all text-lg'
+        >×</button>
+
+        <div className='px-8 pt-8 pb-10 text-center'>
+          {/* Animated icon */}
+          <div className='relative mx-auto w-20 h-20 mb-6'>
+            <div className='absolute inset-0 rounded-full bg-indigo-100 animate-ping opacity-40' />
+            <div className='relative w-20 h-20 rounded-full flex items-center justify-center' style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)' }}>
+              <svg className='w-9 h-9 text-white' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={1.8} d='M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z' />
+              </svg>
+            </div>
+          </div>
+
+          {/* Badge */}
+          <span className='inline-block px-3 py-1 rounded-full text-xs font-bold tracking-widest mb-4' style={{ background: 'linear-gradient(135deg,#ede9fe,#fce7f3)', color: '#7c3aed' }}>
+            COMING SOON
+          </span>
+
+          <h2 className='text-2xl font-bold text-gray-900 mb-2'>Online Payments</h2>
+          <p className='text-gray-500 text-sm leading-relaxed mb-1'>
+            We're working hard to bring you a seamless payment experience.
+          </p>
+          <p className='text-gray-400 text-xs leading-relaxed mb-8'>
+            Pay online for your appointments, prescriptions & more — all in one click. Stay tuned!
+          </p>
+
+          {/* Feature pills */}
+          <div className='flex flex-wrap justify-center gap-2 mb-8'>
+            {['💳 Cards', '📱 UPI', '🏦 Net Banking', '💰 Wallets'].map(f => (
+              <span key={f} className='px-3 py-1.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-500 border border-gray-200'>{f}</span>
+            ))}
+          </div>
+
+          <button
+            onClick={onClose}
+            className='w-full py-3 rounded-2xl text-white font-semibold text-sm transition-all hover:opacity-90 active:scale-95'
+            style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)' }}
+          >
+            Got it, I'll wait! 🚀
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── Main Component ────────────────────────────────────────────────────────────
 const MyAppointments = () => {
   const { backendUrl, token, slotDateFormat } = useContext(AppContext)
@@ -307,6 +391,12 @@ const MyAppointments = () => {
   const [chatItem, setChatItem] = useState(null)
   const [confirmDeleteId, setConfirmDeleteId] = useState(null)
   const [emailItem, setEmailItem] = useState(null)
+  const [showPayModal, setShowPayModal] = useState(false)
+  // accordion state: [todayCompleted, todayCancelled, allCompleted, allCancelled]
+  const [openTodayCompleted, setOpenTodayCompleted] = useState(false)
+  const [openTodayCancelled, setOpenTodayCancelled] = useState(false)
+  const [openAllCompleted, setOpenAllCompleted] = useState(false)
+  const [openAllCancelled, setOpenAllCancelled] = useState(false)
 
   const getUserAppointments = async () => {
     try {
@@ -355,7 +445,7 @@ const MyAppointments = () => {
     const doc = buildPrescriptionDoc(item, slotDateFormat)
     const fileName = `Prescription_${item.docData?.name || 'Doctor'}_${item.slotDate}.pdf`
     doc.save(fileName.replace(/\s+/g, '_'))
-  }, [])
+  }, [slotDateFormat])
 
   const downloadCertificate = useCallback((item) => {
     // Opens certificate in a new window with print dialog for Save as PDF
@@ -365,6 +455,11 @@ const MyAppointments = () => {
   useEffect(() => {
     if (token) getUserAppointments()
   }, [token])
+
+  const today = new Date()
+  const todaySlotDate = `${today.getDate()}_${today.getMonth() + 1}_${today.getFullYear()}`
+  const todayAppointments = appointments.filter(a => a.slotDate === todaySlotDate)
+  const allAppointments = appointments.filter(a => a.slotDate !== todaySlotDate)
 
   return (
     <div className='max-w-3xl mx-auto'>
@@ -390,8 +485,9 @@ const MyAppointments = () => {
         </div>
       )}
 
-      <div className='flex flex-col gap-5'>
-        {appointments.map((item, index) => {
+      {/* renderCard helper – defined inline via IIFE-style map */}
+      {(() => {
+        const renderCard = (item, index) => {
           const isPending  = !item.cancelled && !item.isCompleted
           const isCompleted = item.isCompleted
           const isCancelled = item.cancelled && !item.isCompleted
@@ -515,7 +611,10 @@ const MyAppointments = () => {
 
                 {/* UPCOMING */}
                 {isPending && <>
-                  <button className='flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all'>
+                  <button
+                    onClick={() => setShowPayModal(true)}
+                    className='flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all'
+                  >
                     <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z'/></svg>
                     Pay Online
                   </button>
@@ -553,17 +652,13 @@ const MyAppointments = () => {
                     Chat
                     {item.unreadCount > 0 && <span className='absolute -top-2 -right-2 bg-red-500 text-white text-[9px] font-bold w-4 h-4 flex items-center justify-center rounded-full border border-white'>{item.unreadCount}</span>}
                   </button>
-                  {item.prescription && <>
+                  {item.prescription && (
                     <button onClick={() => setPreviewItem(item)} className='flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-600 hover:text-white transition-all'>
                       <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 12a3 3 0 11-6 0 3 3 0 016 0z'/><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z'/></svg>
                       View Rx
                     </button>
-                    <button onClick={() => downloadPrescription(item)} className='flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-800 hover:text-white transition-all'>
-                      <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4'/></svg>
-                      Download Rx
-                    </button>
-                  </>}
-                  {item.medicalCertificate && <>
+                  )}
+                  {item.medicalCertificate && (
                     <button
                       onClick={() => setCertPreviewItem(item)}
                       className='flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold bg-teal-50 text-teal-700 border border-teal-200 hover:bg-teal-600 hover:text-white transition-all'
@@ -573,16 +668,7 @@ const MyAppointments = () => {
                       </svg>
                       View Certificate
                     </button>
-                    <button
-                      onClick={() => downloadCertificate(item)}
-                      className='flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-600 hover:text-white transition-all'
-                    >
-                      <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                        <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4' />
-                      </svg>
-                      Download Cert
-                    </button>
-                  </>}
+                  )}
                   <button
                     onClick={() => setEmailItem(item)}
                     className='flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold bg-teal-50 text-teal-700 border border-teal-200 hover:bg-teal-600 hover:text-white transition-all'
@@ -623,8 +709,124 @@ const MyAppointments = () => {
               </div>
             </div>
           )
-        })}
-      </div>
+        }
+
+        const renderSection = (list, openCompleted, setOpenCompleted, openCancelled, setOpenCancelled) => {
+          const pending   = list.filter(a => !a.cancelled && !a.isCompleted)
+          const completed = list.filter(a => a.isCompleted)
+          const cancelled = list.filter(a => a.cancelled && !a.isCompleted)
+
+          return (
+            <div className='space-y-6'>
+              {/* Pending – always visible */}
+              {pending.length > 0 ? (
+                <div className='flex flex-col gap-5'>
+                  {pending.map((item, i) => renderCard(item, i))}
+                </div>
+              ) : (
+                <div className='flex items-center gap-3 px-4 py-3 rounded-xl bg-indigo-50/50 border border-indigo-100 text-sm text-indigo-500'>
+                  <span className='text-lg'>✅</span> No pending appointments in this section.
+                </div>
+              )}
+
+              {/* Completed – collapsible */}
+              {completed.length > 0 && (
+                <div>
+                  <button
+                    onClick={() => setOpenCompleted(o => !o)}
+                    className='w-full flex items-center justify-between px-4 py-2.5 rounded-xl bg-green-50 border border-green-100 hover:bg-green-100 transition-colors group'
+                  >
+                    <span className='flex items-center gap-2 text-sm font-semibold text-green-700'>
+                      <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M5 13l4 4L19 7'/></svg>
+                      Completed
+                      <span className='bg-green-200 text-green-800 text-xs font-bold px-2 py-0.5 rounded-full'>{completed.length}</span>
+                    </span>
+                    <svg className={`w-4 h-4 text-green-500 transition-transform duration-200 ${openCompleted ? 'rotate-180' : ''}`} fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M19 9l-7 7-7-7'/></svg>
+                  </button>
+                  {openCompleted && (
+                    <div className='flex flex-col gap-5 mt-4'>
+                      {completed.map((item, i) => renderCard(item, i))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Cancelled – collapsible */}
+              {cancelled.length > 0 && (
+                <div>
+                  <button
+                    onClick={() => setOpenCancelled(o => !o)}
+                    className='w-full flex items-center justify-between px-4 py-2.5 rounded-xl bg-red-50 border border-red-100 hover:bg-red-100 transition-colors group'
+                  >
+                    <span className='flex items-center gap-2 text-sm font-semibold text-red-600'>
+                      <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M6 18L18 6M6 6l12 12'/></svg>
+                      Cancelled
+                      <span className='bg-red-200 text-red-800 text-xs font-bold px-2 py-0.5 rounded-full'>{cancelled.length}</span>
+                    </span>
+                    <svg className={`w-4 h-4 text-red-400 transition-transform duration-200 ${openCancelled ? 'rotate-180' : ''}`} fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M19 9l-7 7-7-7'/></svg>
+                  </button>
+                  {openCancelled && (
+                    <div className='flex flex-col gap-5 mt-4'>
+                      {cancelled.map((item, i) => renderCard(item, i))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )
+        }
+
+        return (
+          <>
+            {/* ── TODAY'S APPOINTMENTS ── */}
+            <div className='mb-10'>
+              <div className='flex items-center gap-3 mb-4'>
+                <div className='flex items-center gap-2 px-4 py-2 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-md shadow-indigo-200'>
+                  <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' />
+                  </svg>
+                  <span className='text-sm font-bold'>Today's Appointments</span>
+                  <span className='ml-1 bg-white/25 text-white text-xs font-bold px-2 py-0.5 rounded-full'>{todayAppointments.length}</span>
+                </div>
+                <span className='text-xs text-gray-400'>{today.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
+              </div>
+
+              {todayAppointments.length === 0 ? (
+                <div className='flex items-center gap-4 p-5 rounded-2xl bg-indigo-50/60 border border-indigo-100'>
+                  <div className='text-3xl'>☀️</div>
+                  <div>
+                    <p className='font-semibold text-indigo-700 text-sm'>No appointments today</p>
+                    <p className='text-xs text-indigo-400 mt-0.5'>You're free today! Check your upcoming schedule below.</p>
+                  </div>
+                </div>
+              ) : renderSection(todayAppointments, openTodayCompleted, setOpenTodayCompleted, openTodayCancelled, setOpenTodayCancelled)}
+            </div>
+
+            {/* ── ALL APPOINTMENTS ── */}
+            <div className='pb-8'>
+              <div className='flex items-center gap-3 mb-4'>
+                <div className='flex items-center gap-2 px-4 py-2 rounded-2xl bg-white border border-gray-200 text-gray-700 shadow-sm'>
+                  <svg className='w-4 h-4 text-gray-500' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' />
+                  </svg>
+                  <span className='text-sm font-bold'>All Appointments</span>
+                  <span className='ml-1 bg-gray-100 text-gray-500 text-xs font-bold px-2 py-0.5 rounded-full'>{allAppointments.length}</span>
+                </div>
+              </div>
+
+              {allAppointments.length === 0 ? (
+                <div className='flex items-center gap-4 p-5 rounded-2xl bg-gray-50 border border-gray-100'>
+                  <div className='text-3xl'>📋</div>
+                  <div>
+                    <p className='font-semibold text-gray-600 text-sm'>No other appointments</p>
+                    <p className='text-xs text-gray-400 mt-0.5'>All your appointments are scheduled for today.</p>
+                  </div>
+                </div>
+              ) : renderSection(allAppointments, openAllCompleted, setOpenAllCompleted, openAllCancelled, setOpenAllCancelled)}
+            </div>
+          </>
+        )
+      })()}
 
       {/* Prescription Preview Modal */}
       {previewItem && (
@@ -657,6 +859,11 @@ const MyAppointments = () => {
           appointment={emailItem}
           onClose={() => setEmailItem(null)}
         />
+      )}
+
+      {/* Pay Online – Coming Soon Modal */}
+      {showPayModal && (
+        <ComingSoonModal onClose={() => setShowPayModal(false)} />
       )}
     </div>
   )

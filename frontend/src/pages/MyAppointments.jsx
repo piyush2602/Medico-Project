@@ -404,14 +404,14 @@ const MyAppointments = () => {
               className={`rounded-2xl border border-gray-100 border-l-4 ${borderAccent} ${cardBg} shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden`}
             >
               {/* ── Card body ── */}
-              <div className='flex flex-col sm:flex-row gap-4 p-5'>
+              <div className='flex gap-3 sm:gap-4 p-4 sm:p-5'>
 
                 {/* Doctor photo */}
                 <div className='flex-shrink-0'>
                   <img
                     src={item.docData.image}
                     alt={item.docData.name}
-                    className={`w-24 h-24 sm:w-28 sm:h-28 rounded-xl object-cover border-2 transition-all ${
+                    className={`w-20 h-20 sm:w-28 sm:h-28 rounded-xl object-cover border-2 transition-all ${
                       isPending  ? 'border-indigo-100' :
                       isCompleted ? 'border-green-100'  : 'border-gray-200 grayscale opacity-70'
                     }`}
@@ -508,7 +508,7 @@ const MyAppointments = () => {
               </div>
 
               {/* ── Action bar ── */}
-              <div className={`px-5 pb-4 pt-1 flex flex-wrap gap-2 border-t ${
+              <div className={`px-4 sm:px-5 pb-4 pt-3 flex flex-wrap gap-2 sm:gap-3 border-t ${
                 isPending   ? 'border-indigo-50'  :
                 isCompleted ? 'border-green-50/60' : 'border-gray-100'
               }`}>
